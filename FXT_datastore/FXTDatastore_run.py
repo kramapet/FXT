@@ -9,7 +9,7 @@ from rpyc.lib import setup_logger
 from rpyc.core import SlaveService
 import rpyc
 
-from src.fxt_datastore import FXTDatastore
+from src.FXTDatastore import FXTDatastore
 
 def setup_optparser():
     parser = OptionParser()
