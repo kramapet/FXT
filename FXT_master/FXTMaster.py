@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import rpyc
 from rpyc.utils.classic import DEFAULT_SERVER_PORT, DEFAULT_SERVER_SSL_PORT
@@ -72,19 +73,25 @@ class FXTMaster():
         print("connecting to ", host, ":", port)
         self.datastore_conn = rpyc.connect(host, port)
     
-    def _get_data_ranges(self):
-        print("data ranges!!!")
-        print(self.datastore_conn.root.exposed_test_method())
+    def _get_data_ranges(self, symbol=None):
+        print(self.datastore_conn.root.exposed_get_data_ranges(symbol))
     
     def _get_data(self):
         pass
 
     def run(self):
         self._connect_to_datastore(self.client_arguments['hostname'], self.client_arguments['port'])
-        self._get_data_ranges()
+        self._get_data_ranges('EUR/USD')
 
+    def run_test(self):
+        pass
+    
+    def run_real(self):
+        pass
 
 if __name__ == '__main__':
     master = FXTMaster()
     master.run()
-    
+
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4   

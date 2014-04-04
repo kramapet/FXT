@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import sys
 import os
@@ -120,5 +121,5 @@ if __name__ == '__main__':
     server_arguments = process_parameters(parser, options)
     run(options, server_arguments)
     
-    
-    
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4     
