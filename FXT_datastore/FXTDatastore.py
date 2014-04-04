@@ -3,34 +3,17 @@
 
 import os
 import re
-import rpyc
 import pandas
 import zipfile
 import shutil
 import datetime
 
-class FXTDatastore(rpyc.Service):
+class FXTDatastore():
     DB_FILE = os.getcwd() + "/data/DS_database.h5"
     TRUEFX_DIR = os.getcwd() + "/trueFX/"
     
     def __init__(self, conn=None):
-        if conn:
-            rpyc.Service.__init__(self, conn)
-        else:
-            self.DB_FILE = os.getcwd() + "/../data/DS_database.h5"
-            self.TRUEFX_DIR = os.getcwd() + "/../trueFX/"
         self._load_internal_database()
-        #self.update_internal_database()
-    
-    def on_connect(self):
-        # code that runs when a connection is created
-        # (to init the serivce, if needed)
-        pass
-
-    def on_disconnect(self):
-        # code that runs when the connection has already closed
-        # (to finalize the service, if needed)
-        pass
     
     def _load_internal_database(self):
         """
@@ -115,7 +98,7 @@ class FXTDatastore(rpyc.Service):
 
 if __name__ == '__main__':
     datastore = FXTDatastore()
-    print(datastore.exposed_get_data_ranges())
+    
         
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4    
