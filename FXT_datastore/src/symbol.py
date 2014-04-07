@@ -11,17 +11,23 @@ class Symbol(list):
         
         self.data_updated = False
         
-    def _dt_to_idx(self, datetime, larger=True):
+    def _dt_to_idx(self, date, larger=True):
         # TODO, find closest date from dates and return index
         # if larger is set to true searching for closest larger date, else for smaller
-        pass
+        print(min(self, key=lambda x: abs(date-x)))
         
     def __getitem__(self, date):
         if isinstance(date, slice):
-            pass
-            start = self._dt_to_idx(date.start)
-            end = self._dt_to_idx(date.stop)
-            return [list.__getitem__(self, i) for i in range(start, end)]
+            start = date.start
+            end = date.stop
+            if ((isinstance(start, int) or (start == None)) and (isinstance(end, int) or (end == None))):
+                return Symbol(self.symbol_name, list.__getitem__(self, date), list.__getitem__(self.dates, date))
+            elif ((isinstance(start, datetime.date) or (start == None)) and (isinstance(end, datetime.date) or (end == None))):
+                #return [list.__getitem__(self, i) for i in range(start, end)]
+                pass
+            else:
+                raise(TypeError, "Invalid argument type.")  
+                
         elif isinstance(date, datetime.date):
             index = self.get_index(date)
             return list.__getitem__(self, index)
@@ -81,8 +87,9 @@ class Symbol(list):
 
 
 if __name__ == '__main__':
-    symbol = Symbol("EURUSD", [(0,1), (1,2), (2,3), (3,4), (4,5)], [datetime.date (2000, 1, (1+i)*2) for i in range (5)])
-    print(symbol[1:3])
+    symbol = Symbol("EURUSD", [(0,1), (1,2), (2,3), (3,4), (4,5)], [datetime.date(2000, 1, (1+i)*2) for i in range (5)])
+    print(symbol[1:2])
+    #symbol._dt_to_idx(datetime.date(2000, 1, 3, 12))
         
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4    
