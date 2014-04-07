@@ -6,6 +6,8 @@ import bisect
 
 class Symbol(list):
     def __init__(self, symbol_name, values, dates):
+        if len(values) != len(dates):
+            raise(ValueError, "Values and dates must be the same size")
         list.__init__(self, values)
         self.dates = dates
         self.symbol_name = symbol_name
@@ -68,6 +70,7 @@ class Symbol(list):
             output += "    ...\n"
             for i in range(5, 0, -1):
                 output += "  " + str(self.dates[i]) + ": " + str(list.__getitem__(self, i)) + "\n"
+        output += "Number of elements: " + str(len(self.dates)) + "\n"
         return output
 
     def __delitem__(self, arg):
@@ -83,28 +86,33 @@ class Symbol(list):
         for element in zip(self.dates, list.__getitem__(self, slice(None, None))):
             yield element
 
-    def append(self, data, dates=None):
-        """Append data to the data and dates fields
+    def append(self, values, dates=None):
+        """Append values to the values and dates fields
            There are three append possibilities:
                Append another Symbol object
                Append two lists of values and dates
                Append single element with date
         """
         if dates is None:
-            if isinstance(data, Symbol):
-                list.extend(self, list(zip(*list(data)))[1]) #blah!
-                list.extend(self.dates, data.dates)
+            if isinstance(values, Symbol):
+                list.extend(self, list(zip(*list(values)))[1]) #blah!
+                list.extend(self.dates, values.dates)
             else:
-                raise(TypeError, "Only Symbol object, 2 lists of data/dates and single data/date can be appended.")    
+                raise(TypeError, "Only Symbol object, 2 lists of values/dates and single values/date can be appended.")    
         else:
-            if isinstance(data, list) and isinstance(dates, list):
-                list.extend(self, data)
+            if isinstance(values, list) and isinstance(dates, list):
+                if len(values) != len(dates):
+                    raise(ValueError, "values and dates must be the same size")
+                list.extend(self, values)
                 list.extend(self.dates, dates)
             elif isinstance(dates, datetime.datetime):
-                list.append(self, data)
+                list.append(self, values)
                 list.append(self.dates, dates)
             else:
-                raise(TypeError, "Only Symbol object, 2 lists of data/dates and single data/date can be appended.")  
+                raise(TypeError, "Only Symbol object, 2 lists of values/dates and single values/date can be appended.")  
+    
+    def plot(self):
+        pass
     
     def save(self, path):
         if self.data_updated:
@@ -146,6 +154,7 @@ if __name__ == '__main__':
     #symbol.append(symbol2)
     #symbol.append([(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
     #symbol.append((11,12), datetime.datetime(2001, 1, 4))
+    #symbol.append([(11,12), (12,13)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
     
     print(symbol)
 
