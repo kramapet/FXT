@@ -79,6 +79,9 @@ class Symbol(list):
             list.__delitem__(self, index)
             list.__delitem__(self.dates, index)
     
+    def __iter__(self):
+        for element in zip(self.dates, list.__getitem__(self, slice(None, None))):
+            yield element
 
     def append(self, data, dates=None):
         """Append data to the data and dates fields
@@ -89,7 +92,7 @@ class Symbol(list):
         """
         if dates is None:
             if isinstance(data, Symbol):
-                list.extend(self, data)
+                list.extend(self, list(zip(*list(data)))[1]) #blah!
                 list.extend(self.dates, data.dates)
             else:
                 raise(TypeError, "Only Symbol object, 2 lists of data/dates and single data/date can be appended.")    
@@ -102,8 +105,6 @@ class Symbol(list):
                 list.append(self.dates, dates)
             else:
                 raise(TypeError, "Only Symbol object, 2 lists of data/dates and single data/date can be appended.")  
-
-
     
     def save(self, path):
         if self.data_updated:
@@ -116,7 +117,7 @@ class Symbol(list):
 
 if __name__ == '__main__':
     symbol = Symbol("EURUSD", [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (7,8), (8,9), (9,10)], [datetime.datetime(2000, 1, (1+i)*2) for i in range (10)])
-    
+
     print(symbol)
     
     # INDEXING TESTS
@@ -136,8 +137,16 @@ if __name__ == '__main__':
     #symbol.__delitem__(datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0))
     #print(symbol)
 
+    # ITER TESTS
+    #for i in symbol:
+    #    print(i)
+
+    # APPEND TESTS
+    symbol2 = Symbol("EURUSD", [(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
+    #symbol.append(symbol2)
+    #symbol.append([(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
+    #symbol.append((11,12), datetime.datetime(2001, 1, 4))
     
-    #symbol._dt_to_idx(datetime.date(2000, 1, 3, 12))
-        
+    print(symbol)
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4    
