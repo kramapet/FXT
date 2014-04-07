@@ -3,6 +3,7 @@
 
 import datetime
 import bisect
+import matplotlib.pyplot as pyplot
 
 class Symbol(list):
     def __init__(self, symbol_name, values, dates):
@@ -112,7 +113,11 @@ class Symbol(list):
                 raise(TypeError, "Only Symbol object, 2 lists of values/dates and single values/date can be appended.")  
     
     def plot(self):
-        pass
+        data = list(zip(*list(self)))
+        pyplot.line = pyplot.plot(data[0], data[1], label=self.symbol_name)
+        pyplot.legend(loc='upper left')
+        pyplot.show()
+
     
     def save(self, path):
         if self.data_updated:
@@ -124,7 +129,7 @@ class Symbol(list):
 
 
 if __name__ == '__main__':
-    symbol = Symbol("EURUSD", [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (7,8), (8,9), (9,10)], [datetime.datetime(2000, 1, (1+i)*2) for i in range (10)])
+    symbol = Symbol("EURUSD", [(0,1), (1,2), (10,3), (3,4), (4,5), (5,6), (6,7), (7,8), (8,9), (9,10)], [datetime.datetime(2000, 1, (1+i)*2) for i in range (10)])
 
     print(symbol)
     
@@ -150,12 +155,14 @@ if __name__ == '__main__':
     #    print(i)
 
     # APPEND TESTS
-    symbol2 = Symbol("EURUSD", [(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
+    #symbol2 = Symbol("EURUSD", [(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
     #symbol.append(symbol2)
     #symbol.append([(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
     #symbol.append((11,12), datetime.datetime(2001, 1, 4))
     #symbol.append([(11,12), (12,13)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
     
-    print(symbol)
+    #print(symbol)
+    
+    symbol.plot()
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4    
