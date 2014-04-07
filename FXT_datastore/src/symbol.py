@@ -70,25 +70,40 @@ class Symbol(list):
                 output += "  " + str(self.dates[i]) + ": " + str(list.__getitem__(self, i)) + "\n"
         return output
 
-    def append(self, data, dates=None):
-        """Append data to the data and dates fields"""
-        if dates is None:
-            for entry in data:
-                if isinstance(entry[1], list) or isinstance(entry[1], tuple):
-                    # format: data = [(date, (ask, bid)), ... ]
-                    list.append(entry[1])
-                    self.dates.append(entry[0])
-                else:
-                    # format: data = [((ask, bid), date), ... ]
-                    list.append(entry[1])
-                    self.dates.append(entry[0])
-        else:
-            # format: data = [(ask, bid), ...] , dates = (date, ...)
-            list.append(data)
-            self.dates.append(dates)
+    def __delitem__(self, arg):
+        if isinstance(arg, int):
+            list.__delitem__(self, arg)
+            list.__delitem__(self.dates, arg)
+        elif isinstance(arg, datetime.datetime):
+            index = self._dt_to_idx(arg)
+            list.__delitem__(self, index)
+            list.__delitem__(self.dates, index)
+    
 
-    def delete(self, start_date, stop_date):
-        pass
+    def append(self, data, dates=None):
+        """Append data to the data and dates fields
+           There are three append possibilities:
+               Append another Symbol object
+               Append two lists of values and dates
+               Append single element with date
+        """
+        if dates is None:
+            if isinstance(data, Symbol):
+                list.extend(self, data)
+                list.extend(self.dates, data.dates)
+            else:
+                raise(TypeError, "Only Symbol object, 2 lists of data/dates and single data/date can be appended.")    
+        else:
+            if isinstance(data, list) and isinstance(dates, list):
+                list.extend(self, data)
+                list.extend(self.dates, dates)
+            elif isinstance(dates, datetime.datetime):
+                list.append(self, data)
+                list.append(self.dates, dates)
+            else:
+                raise(TypeError, "Only Symbol object, 2 lists of data/dates and single data/date can be appended.")  
+
+
     
     def save(self, path):
         if self.data_updated:
@@ -101,14 +116,26 @@ class Symbol(list):
 
 if __name__ == '__main__':
     symbol = Symbol("EURUSD", [(0,1), (1,2), (2,3), (3,4), (4,5), (5,6), (6,7), (7,8), (8,9), (9,10)], [datetime.datetime(2000, 1, (1+i)*2) for i in range (10)])
-    print(symbol[:])
+    
+    print(symbol)
+    
+    # INDEXING TESTS
+    #print(symbol[:])
     #print(symbol[1:3])
     #print(symbol[1:-1])
     #print(symbol[1])
     #print(symbol[datetime.datetime(2000, 1, 4)])
     #print(symbol[datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0):])
     #print(symbol[:datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0)])
-    print(symbol[datetime.datetime(2000, 1, 5, hour=23, minute=59, second=59):datetime.datetime(2000, 1, 10, hour=0, minute=0, second=1)])
+    #print(symbol[datetime.datetime(2000, 1, 5, hour=23, minute=59, second=59):datetime.datetime(2000, 1, 10, hour=0, minute=0, second=1)])
+    
+    # DELETE TESTS
+    #symbol.__delitem__(datetime.datetime(2000, 1, 4))
+    #symbol.__delitem__(2)
+    #symbol.__delitem__(-1)
+    #symbol.__delitem__(datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0))
+    #print(symbol)
+
     
     #symbol._dt_to_idx(datetime.date(2000, 1, 3, 12))
         
