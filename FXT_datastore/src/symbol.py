@@ -37,12 +37,17 @@ class Symbol():
             raise ValueError
 
     def _dt_slice_to_idx(self, arg):
-        if ((isinstance(arg.start, int) or (arg.start == None)) and (isinstance(arg.stop, int) or (arg.stop == None))):
-            return arg
+        if isinstance(arg.start, datetime):
+            start = self._dt_slice_to_idx(arg.start)
         else:
-            start = self._dt_to_idx(arg.start, left=True)
-            stop = self._dt_to_idx(arg.stop, left=False)
-            return slice(start, stop, arg.step)
+            start = arg.start
+            
+        if isinstance(arg.stop, datetime):
+            stop = self._dt_slice_to_idx(arg.stop)
+        else:
+            stop = arg.stop
+            
+        return slice(start, stop, arg.step)
 
     def __len__(self):
         return len(self.dates)
@@ -144,7 +149,7 @@ if __name__ == '__main__':
     #symbol.__delitem__(datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0)) # should fail
     #symbol.__delitem__(slice(1, 8))
     #symbol.__delitem__(slice(datetime.datetime(2000, 1, 5, hour=23, minute=59, second=59), datetime.datetime(2000, 1, 10, hour=0, minute=0, second=1)))
-    print(symbol)
+    #sprint(symbol)
 
     # ITER TESTS
     #for i in symbol:
