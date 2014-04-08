@@ -5,12 +5,13 @@ import datetime
 import bisect
 import matplotlib.pyplot as pyplot
 
-class Symbol(list):
+class Symbol():
     def __init__(self, symbol_name, values, dates):
         if len(values) != len(dates):
             raise(ValueError, "Values and dates must be the same size")
-        list.__init__(self, values)
+        
         self.dates = dates
+        self.values = values
         self.symbol_name = symbol_name
         
         self.data_updated = False
@@ -18,103 +19,91 @@ class Symbol(list):
     def _dt_to_idx(self, date, left=None):
         if date is None:
             return None
+        i = bisect.bisect_left(self.dates, date)
         if left is None:
-            i = bisect.bisect_left(self.dates, date)
             if i != len(self.dates) and self.dates[i] == date:
                 return i
             raise(ValueError)
         elif left == True:
             # Find leftmost item greater than or equal to date
-            i = bisect.bisect_left(self.dates, date)
             if i != len(self.dates):
                 return i
             raise ValueError
         else:
             # Find rightmost value less than x
-            i = bisect.bisect_left(self.dates, date)
             if i:
                 return i
             raise ValueError
 
+    def __len__(self):
+        return len(self.dates)
+
     def __getitem__(self, arg):
         if isinstance(arg, slice):
             if ((isinstance(arg.start, int) or (arg.start == None)) and (isinstance(arg.stop, int) or (arg.stop == None))):
-                return Symbol(self.symbol_name, list.__getitem__(self, arg), list.__getitem__(self.dates, arg))
-            elif ((isinstance(arg.start, datetime.datetime) or (arg.start == None)) and (isinstance(arg.stop, datetime.datetime) or (arg.stop == None))):
+                return Symbol(self.symbol_name, self.values[arg], self.dates[arg])
+            else:
                 start = self._dt_to_idx(arg.start, left=True)
                 stop = self._dt_to_idx(arg.stop, left=False)
                 s = slice(start, stop)
-                return Symbol(self.symbol_name, list.__getitem__(self, s), list.__getitem__(self.dates, s))
-            else:
-                raise(TypeError, "Invalid argument type.")  
+                return Symbol(self.symbol_name, self.values[s], self.dates[s])
         elif isinstance(arg, datetime.datetime):
             index = self._dt_to_idx(arg)
-            return list.__getitem__(self, index)
-        elif isinstance(arg, int):
-            if arg < 0:
-                arg += len(self)
-            if arg >= len(self):
-                raise(IndexError, "index out of range {}".format(arg))
-            return (self.dates[arg], list.__getitem__(self, arg))
+            return (self.dates[index], self.values[index])
         else:
-            raise(TypeError, "Invalid argument type.")  
+            return (self.dates[arg], self.values[arg])
     
     def __str__(self):
         output = "Symbol name: " + self.symbol_name + "\n"
-        size = list.__len__(self)
+        size = self.__len__()
         if size < 20:
             for i in range(size):
-                output += "  " + str(self.dates[i]) + ": " + str(list.__getitem__(self, i)) + "\n"
+                output += "  " + str(self.dates[i]) + ": " + str(self.values[i]) + "\n"
         else:
             for i in range(5):
-                output += "  " + str(self.dates[i]) + ": " + str(list.__getitem__(self, i)) + "\n"
+                output += "  " + str(self.dates[i]) + ": " + str(self.values[i]) + "\n"
             output += "    ...\n"
             for i in range(5, 0, -1):
-                output += "  " + str(self.dates[i]) + ": " + str(list.__getitem__(self, i)) + "\n"
+                output += "  " + str(self.dates[i]) + ": " + str(self.values[i]) + "\n"
         output += "Number of elements: " + str(len(self.dates)) + "\n"
         return output
 
     def __delitem__(self, arg):
-        if isinstance(arg, int):
-            list.__delitem__(self, arg)
-            list.__delitem__(self.dates, arg)
-        elif isinstance(arg, datetime.datetime):
-            index = self._dt_to_idx(arg)
-            list.__delitem__(self, index)
-            list.__delitem__(self.dates, index)
+        if isinstance(arg, datetime.datetime):
+            arg = self._dt_to_idx(arg)
+        list.__delitem__(self.values, arg)
+        list.__delitem__(self.dates, arg)
     
     def __iter__(self):
-        for element in zip(self.dates, list.__getitem__(self, slice(None, None))):
-            yield element
+        return zip(self.dates, self.values)
 
-    def append(self, values, dates=None):
-        """Append values to the values and dates fields
+    def append(self, arg1, arg2=None):
+        """Append arg1 to the arg1 and arg2 fields
            There are three append possibilities:
                Append another Symbol object
-               Append two lists of values and dates
+               Append two lists of arg1 and arg2
                Append single element with date
         """
-        if dates is None:
-            if isinstance(values, Symbol):
-                list.extend(self, list(zip(*list(values)))[1]) #blah!
-                list.extend(self.dates, values.dates)
+        if arg2 is None:
+            if isinstance(arg1, Symbol):
+                list.extend(self.values, arg1.values)
+                list.extend(self.dates, arg1.dates)
             else:
-                raise(TypeError, "Only Symbol object, 2 lists of values/dates and single values/date can be appended.")    
+                raise(TypeError, "Only Symbol object, 2 lists of arg1/arg2 and single arg1/date can be appended.")    
         else:
-            if isinstance(values, list) and isinstance(dates, list):
-                if len(values) != len(dates):
-                    raise(ValueError, "values and dates must be the same size")
-                list.extend(self, values)
-                list.extend(self.dates, dates)
-            elif isinstance(dates, datetime.datetime):
-                list.append(self, values)
-                list.append(self.dates, dates)
+            if isinstance(arg1, list) and isinstance(arg2, list):
+                if len(arg1) != len(arg2):
+                    raise(ValueError, "arg1 and arg2 must be the same size")
+                self.values.extend(arg1)
+                self.dates.extend(arg2)
+            elif isinstance(arg2, datetime.datetime):
+                self.values.append(arg1)
+                self.dates.append(arg2)
             else:
-                raise(TypeError, "Only Symbol object, 2 lists of values/dates and single values/date can be appended.")  
+                raise(TypeError, "Only Symbol object, 2 lists of arg1/arg2 and single arg1/date can be appended.")  
     
     def plot(self):
-        data = list(zip(*list(self)))
-        pyplot.line = pyplot.plot(data[0], data[1], label=self.symbol_name)
+        pyplot.line = pyplot.plot(self.dates, self.values, label=self.symbol_name)
         pyplot.legend(loc='upper left')
         pyplot.show()
 
