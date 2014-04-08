@@ -19,6 +19,7 @@ class Symbol():
     def _dt_to_idx(self, date, left=None):
         if date is None:
             return None
+
         i = bisect.bisect_left(self.dates, date)
         if left is None:
             if i != len(self.dates) and self.dates[i] == date:
@@ -35,23 +36,28 @@ class Symbol():
                 return i
             raise ValueError
 
+    def _dt_slice_to_idx(self, arg):
+        if ((isinstance(arg.start, int) or (arg.start == None)) and (isinstance(arg.stop, int) or (arg.stop == None))):
+            return arg
+        else:
+            start = self._dt_to_idx(arg.start, left=True)
+            stop = self._dt_to_idx(arg.stop, left=False)
+            return slice(start, stop, arg.step)
+
     def __len__(self):
         return len(self.dates)
 
     def __getitem__(self, arg):
         if isinstance(arg, slice):
-            if ((isinstance(arg.start, int) or (arg.start == None)) and (isinstance(arg.stop, int) or (arg.stop == None))):
-                return Symbol(self.symbol_name, self.values[arg], self.dates[arg])
-            else:
-                start = self._dt_to_idx(arg.start, left=True)
-                stop = self._dt_to_idx(arg.stop, left=False)
-                s = slice(start, stop)
-                return Symbol(self.symbol_name, self.values[s], self.dates[s])
-        elif isinstance(arg, datetime.datetime):
-            index = self._dt_to_idx(arg)
-            return (self.dates[index], self.values[index])
+            return Symbol(self.symbol_name, self.values[self._dt_slice_to_idx(arg)],
+                          self.dates[self._dt_slice_to_idx(arg)])
         else:
+            if isinstance(arg, datetime.datetime):
+                arg = self._dt_to_idx(arg)
             return (self.dates[arg], self.values[arg])
+    
+    def __iter__(self):
+        return zip(self.dates, self.values)
     
     def __str__(self):
         output = "Symbol name: " + self.symbol_name + "\n"
@@ -69,13 +75,12 @@ class Symbol():
         return output
 
     def __delitem__(self, arg):
-        if isinstance(arg, datetime.datetime):
+        if isinstance(arg, slice):
+            arg = self._dt_slice_to_idx(arg)
+        elif isinstance(arg, datetime.datetime):
             arg = self._dt_to_idx(arg)
         list.__delitem__(self.values, arg)
         list.__delitem__(self.dates, arg)
-    
-    def __iter__(self):
-        return zip(self.dates, self.values)
 
     def append(self, arg1, arg2=None):
         """Append arg1 to the arg1 and arg2 fields
@@ -136,8 +141,10 @@ if __name__ == '__main__':
     #symbol.__delitem__(datetime.datetime(2000, 1, 4))
     #symbol.__delitem__(2)
     #symbol.__delitem__(-1)
-    #symbol.__delitem__(datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0))
-    #print(symbol)
+    #symbol.__delitem__(datetime.datetime(2000, 1, 4, hour=20, minute=30, second=0)) # should fail
+    #symbol.__delitem__(slice(1, 8))
+    #symbol.__delitem__(slice(datetime.datetime(2000, 1, 5, hour=23, minute=59, second=59), datetime.datetime(2000, 1, 10, hour=0, minute=0, second=1)))
+    print(symbol)
 
     # ITER TESTS
     #for i in symbol:
@@ -148,10 +155,10 @@ if __name__ == '__main__':
     #symbol.append(symbol2)
     #symbol.append([(11,12), (12,13), (13,14)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
     #symbol.append((11,12), datetime.datetime(2001, 1, 4))
-    #symbol.append([(11,12), (12,13)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)])
+    #symbol.append([(11,12), (12,13)], [datetime.datetime(2001, 1, (1+i)*2) for i in range (3)]) # should fail
     
     #print(symbol)
     
-    symbol.plot()
+    #symbol.plot()
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4    
