@@ -14,7 +14,7 @@ class Symbol():
         self.values = values
         self.symbol_name = symbol_name
         
-        self.data_updated = False
+        self.data_updated = True
         
     def _dt_to_idx(self, date, left=None):
         if date is None:
@@ -80,6 +80,7 @@ class Symbol():
         return output
 
     def __delitem__(self, arg):
+        self.data_updated = True
         if isinstance(arg, slice):
             arg = self._dt_slice_to_idx(arg)
         elif isinstance(arg, datetime.datetime):
@@ -94,6 +95,7 @@ class Symbol():
                Append two lists of arg1 and arg2
                Append single element with date
         """
+        self.data_updated = True
         if arg2 is None:
             if isinstance(arg1, Symbol):
                 list.extend(self.values, arg1.values)
@@ -118,14 +120,6 @@ class Symbol():
         pyplot.show()
 
     
-    def save(self, path):
-        if self.data_updated:
-            # save to disk
-            pass
-    
-    def load(self, path):
-        pass
-
 
 if __name__ == '__main__':
     symbol = Symbol("EURUSD", [(0,1), (1,2), (10,3), (3,4), (4,5), (5,6), (6,7), (7,8), (8,9), (9,10)], [datetime.datetime(2000, 1, (1+i)*2) for i in range (10)])
