@@ -37,12 +37,12 @@ class FXTDatastore():
         except:
             print("file: " + self.DATABASE_DIR + "database.pkl not found")
 
-    def _load_symbol_data(self, symbol_name):
+    def _load_symbol_data(self, symbol_name, key):
         """Load selected symbol from the pickle file.
         """ 
         try:
-            with gzip.open(self.database[symbol_name]['pickle'], 'rb') as f:
-                self.data[symbol_name] = pickle.load(f)
+            with gzip.open(self.database[symbol_name][key]['pickle'], 'rb') as f:
+                self.data[symbol_name].setdefault(key, pickle.load(f))
         except:
             print("file: " + self.database[symbol_name]['pickle'] + " not found")
             
@@ -56,11 +56,12 @@ class FXTDatastore():
 
         # store data
         for symbol_name in self.data:
-            if self.data[symbol_name].data_updated:
-                print("Storing symbol", symbol_name, "to the database")
-                self.data[symbol_name].data_updated = False
-                with gzip.open(self.database[symbol_name]['pickle'], "wb") as f:
-                    pickle.dump(self.data[symbol_name], f)
+            for key in self.data[symbol_name]:
+                if self.data[symbol_name][key].data_updated:
+                    print("Storing symbol", symbol_name, "to the database")
+                    self.data[symbol_name][key].data_updated = False
+                    with gzip.open(self.database[symbol_name][key]['pickle'], "wb") as f:
+                        pickle.dump(self.data[symbol_name][key], f)
                     
     def _read_zip_file(self, filename):
         """Read source zip file and generate values/dates
@@ -84,7 +85,7 @@ class FXTDatastore():
             print("Done adding data...")
         return values, dates;
 
-    def _create_new_symbol(self, filename, symbol, starting_date):
+    def _add_new_symbol(self, filename, symbol, key):
         """Add newly read data to the database and create new symbol
         
         Args:
@@ -92,43 +93,19 @@ class FXTDatastore():
             symbol: name of the symbol
             starting_date: date extracted from the source zip file
         """ 
-        values, dates = self._read_zip_file(filename)
         
         #update database
-        self.database.setdefault(symbol, {})
-        self.database[symbol]['pickle'] = self.DATABASE_DIR + symbol + ".pklz";
-        self.database[symbol]['files'] = [filename];
-        self.database[symbol]['first_date'] = dates[1];
-        self.database[symbol]['last_date'] = dates[-1];
+        db_filename = self.DATABASE_DIR + symbol + "_" + list(key)[0] + "_" + list(key)[1] + ".pklz";
+        self.database.setdefault(symbol, {}).setdefault(key, {})
+        self.database[symbol][key]['pickle'] = db_filename
+        self.database[symbol][key]['files'] = [filename];
+        self.database[symbol][key]['first_date'] = dates[1];
+        self.database[symbol][key]['last_date'] = dates[-1];
         
         # create symbol
-        self.data[symbol] = Symbol(symbol, values, dates)
-        
-            
-    def _add_to_existing_symbol(self, filename, symbol, starting_date):
-        """Add newly read data to the database of allready existing symbol
-        
-        Args:
-            filename: name of the source zip file
-            symbol: name of the symbol
-            starting_date: date extracted from the source zip file
-        """ 
-        
-        if filename not in self.database[symbol]['files']:
-            if starting_date > self.database[symbol]['last_date']:
-                values, dates = self._read_zip_file(filename)
-                
-                # update database
-                self.database[symbol]['files'].append(filename)
-                self.database[symbol]['last_date'] = dates[-1]
-                
-                # append to the database
-                self.data[symbol].append(values, dates)
+        values, dates = self._read_zip_file(filename)
+        self.data[symbol].setdefault(key, Symbol(symbol, values, dates))
 
-            else:
-                # TODO what if adding to the middle of the existing data?
-                pass
-    
     def update_internal_database(self):
         """Scan folder containing TrueFX data and update database if necessary
         """ 
@@ -137,10 +114,15 @@ class FXTDatastore():
                 symbol, year, month = re.match(r'([A-Z]{6})-(\d{4})-(\d{2}).zip', filename).groups()
                 symbol = symbol.upper()              
                 starting_date = datetime.datetime(int(year), int(month), 1)
+                key = (year, month)
                 if symbol in self.database:
-                    self._add_to_existing_symbol(filename, symbol, starting_date)
+                    if key in self.database[symbol]:
+                        self._add_new_symbol(filename, symbol, key)
+                    else:
+                        print("Allready in database")                            
                 else:
-                    self._create_new_symbol(filename, symbol, starting_date)
+                    self._add_new_symbol(filename, symbol, key)
+                    
 
     def get_available_data_ranges(self, symbol=None):
         """Returns available data ranges for selected symbol (if the symbol is specified)
@@ -151,13 +133,7 @@ class FXTDatastore():
         Returns:
             list of data ranges for selected or for all symbols in the database
         """
-        if symbol:
-            if symbol in self.database:
-                return (symbol, (self.database[symbol]['first_date'], self.database[symbol]['last_date']))
-        else:
-            if self.database:
-                return [[sym, (self.database[sym]['first_date'], self.database[sym]['last_date'])] for sym in self.database]
-        return None
+        pass
         
     def get_available_symbols(self):
         """Returns all available symbol names
@@ -172,15 +148,11 @@ class FXTDatastore():
         
         Args:
             symbol: selected symbol name
+            sl: slice
         Returns:
             Symbol object of data or None when no data found
         """
-        if symbol in self.database:
-            if symbol not in self.data:
-                self._load_symbol_data(symbol)
-            return self.data[symbol][sl]
-        else:
-            return None
+        pass
 
 if __name__ == '__main__':
     #server = SimpleXMLRPCServer(("localhost", 8000))
