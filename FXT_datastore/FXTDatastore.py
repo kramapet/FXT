@@ -24,8 +24,6 @@ class FXTDatastore():
         
         self._load_internal_database()
         self.update_internal_database()
-        
-    def __del__(self):
         self._store_internal_database()
         
     def _load_internal_database(self):
@@ -37,12 +35,12 @@ class FXTDatastore():
         except:
             print("file: " + self.DATABASE_DIR + "database.pkl not found")
 
-    def _load_symbol_data(self, symbol_name, key):
+    def _load_symbol_data(self, symbol_name, year, month):
         """Load selected symbol from the pickle file.
         """ 
         try:
-            with gzip.open(self.database[symbol_name][key]['pickle'], 'rb') as f:
-                self.data[symbol_name].setdefault(key, pickle.load(f))
+            with gzip.open(self.database[symbol_name][year][month]['pickle'], 'rb') as f:
+                elf.data.setdefault(symbol, {}).setdefault(year, {}).setdefault(month, pickle.load(f))
         except:
             print("file: " + self.database[symbol_name]['pickle'] + " not found")
             
@@ -56,13 +54,16 @@ class FXTDatastore():
 
         # store data
         for symbol_name in self.data:
-            for key in self.data[symbol_name]:
-                if self.data[symbol_name][key].data_updated:
-                    print("Storing symbol", symbol_name, "to the database")
-                    self.data[symbol_name][key].data_updated = False
-                    with gzip.open(self.database[symbol_name][key]['pickle'], "wb") as f:
-                        pickle.dump(self.data[symbol_name][key], f)
-                    
+            for year in self.data[symbol_name]:
+                for month in self.data[symbol_name][year]:
+                    if self.data[symbol_name][year][month].data_updated:
+                        print("Storing symbol", symbol_name, "year:", year , ", month:", month, "to the database")
+                        self.data[symbol_name][year][month].data_updated = False
+                        with gzip.open(self.database[symbol_name][year][month]['pickle'], "wb") as f:
+                            pickle.dump(self.data[symbol_name][year][month], f)
+                        print("done")
+        print("finished")
+                        
     def _read_zip_file(self, filename):
         """Read source zip file and generate values/dates
         
@@ -85,26 +86,26 @@ class FXTDatastore():
             print("Done adding data...")
         return values, dates;
 
-    def _add_new_symbol(self, filename, symbol, key):
+    def _add_new_symbol(self, filename, symbol, year, month):
         """Add newly read data to the database and create new symbol
         
         Args:
             filename: name of the source zip file
             symbol: name of the symbol
-            starting_date: date extracted from the source zip file
+            year: 
         """ 
+        values, dates = self._read_zip_file(filename)
         
         #update database
-        db_filename = self.DATABASE_DIR + symbol + "_" + list(key)[0] + "_" + list(key)[1] + ".pklz";
-        self.database.setdefault(symbol, {}).setdefault(key, {})
-        self.database[symbol][key]['pickle'] = db_filename
-        self.database[symbol][key]['files'] = [filename];
-        self.database[symbol][key]['first_date'] = dates[1];
-        self.database[symbol][key]['last_date'] = dates[-1];
+        db_filename = self.DATABASE_DIR + symbol + "_" + year + "_" + month + ".pklz";
+        self.database.setdefault(symbol, {}).setdefault(year, {}).setdefault(month, {})
+        self.database[symbol][year][month]['pickle'] = db_filename
+        self.database[symbol][year][month]['files'] = [filename];
+        self.database[symbol][year][month]['first_date'] = dates[1];
+        self.database[symbol][year][month]['last_date'] = dates[-1];
         
         # create symbol
-        values, dates = self._read_zip_file(filename)
-        self.data[symbol].setdefault(key, Symbol(symbol, values, dates))
+        self.data.setdefault(symbol, {}).setdefault(year, {}).setdefault(month, Symbol(symbol, values, dates))
 
     def update_internal_database(self):
         """Scan folder containing TrueFX data and update database if necessary
@@ -114,14 +115,12 @@ class FXTDatastore():
                 symbol, year, month = re.match(r'([A-Z]{6})-(\d{4})-(\d{2}).zip', filename).groups()
                 symbol = symbol.upper()              
                 starting_date = datetime.datetime(int(year), int(month), 1)
-                key = (year, month)
-                if symbol in self.database:
-                    if key in self.database[symbol]:
-                        self._add_new_symbol(filename, symbol, key)
-                    else:
-                        print("Allready in database")                            
+                print("found file:", filename, ", symbol:", symbol, ", year:", year, ", month:", month)
+                print(self.database)
+                if symbol in self.database and year in self.database[symbol] and month in self.database[symbol][year]:
+                    print("Allready in database")                            
                 else:
-                    self._add_new_symbol(filename, symbol, key)
+                    self._add_new_symbol(filename, symbol, year, month)
                     
 
     def get_available_data_ranges(self, symbol=None):
