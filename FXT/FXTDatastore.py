@@ -5,6 +5,7 @@ import os
 import re
 import zipfile, io, csv
 from datetime import datetime
+from collections import OrderedDict
 
 class FXTDatastore():
     TRUEFX_DIR = "TFX_data/"
@@ -65,7 +66,7 @@ class FXTDatastore():
     
     def get_filenames_by_indices(self, symbol, indices):
         start_index, end_index = indices
-        return [self.database[symbol][k] for k in collections.OrderedDict(sorted(self.database[symbol].items()))]
+        return [self.database[symbol][k] for k in OrderedDict(sorted(self.database[symbol].items()))][start_index, end_index]
         
         
     
