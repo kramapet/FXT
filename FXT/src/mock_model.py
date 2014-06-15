@@ -4,19 +4,12 @@
 import pandas as pd
 
 from src.model import Model
-from src.pricebuffer import PriceBuffer
 
 class MockModel(Model):
     """
     Model class
     """
-    def __init__(self, instrument):
-        self.buffer = PriceBuffer(size=1000)
-
-        self.instrument = instrument
-        self.trades = []
-
-    def train(self, symbol, train_data):
+    def train(self, instrument, train_data):
         pass
 
     def trade(self, broker):
@@ -29,12 +22,15 @@ class MockModel(Model):
             resampled = df.resample('5s', how={'buy':'ohlc', 'sell':'ohlc'})
             print(resampled)
 
-            # do the magic and return 0/vlume/-volume
-            ret = 0
+            ## should we cose some trade?
+            #for trade in trades:
+            #   self.close_position(broker, trade)
 
-            if ret == 1:
-                broker.buy(self.instrument, 1)
-            elif ret == -1:
-                broker.sell(self.instrument, 1)
+            ## should we open some new trade?
+            # do the magic and return 0/vlume/-volume
+            # volume = xxx
+            # self.open_position(broker, self.instrument, volume)
+
+
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

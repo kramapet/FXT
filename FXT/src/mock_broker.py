@@ -12,22 +12,24 @@ class MockBroker():
 
         self.trades = []
 
-    def get_tick_data(self, instrumnet):
+    def get_tick_data(self, instrument):
         while True:
             tick = (datetime.now(), 2, 1)
             self.stat.add_tick(tick)
             yield tick
 
-    def buy(self, instrumnet, volume):
-        pass
+    def open(self, instrument, volume):
+        # register trade
 
-    def sell(self, instrumnet, volume):
+        return Trade(instrument, volume)
+
+    def close(self, trade):
         pass
 
     def get_account_state(self):
         pass
 
-    def get_active_trades(self, instrumnet):
+    def get_active_trades(self, instrument):
         pass
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

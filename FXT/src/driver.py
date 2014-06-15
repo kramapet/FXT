@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+
 from src.mock_model import MockModel
 from src.mock_broker import MockBroker
+from src.test_broker import TestBrokerLocal
 
 class Driver():
     """
@@ -13,7 +16,7 @@ class Driver():
         self.model = self.init_model()
 
     def init_broker(self):
-        return MockBroker()
+        return TestBrokerLocal(account_balance=1000, start_date=datetime(2014, 4, 1), end_date=datetime.now())
 
     def init_model(self):
         return MockModel('EUR_USD')
