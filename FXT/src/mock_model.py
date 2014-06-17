@@ -15,11 +15,11 @@ class MockModel(Model):
     def trade(self, broker):
         for tick in broker.get_tick_data(self.instrument):
             self.buffer.append(tick)
-
+            
             # create pandas dataframe and resample data to 5s - example :-)
             df = pd.DataFrame(list(self.buffer), columns=['datetime', 'buy', 'sell'])
             df.set_index('datetime', inplace=True)
-            resampled = df.resample('5s', how={'buy':'ohlc', 'sell':'ohlc'})
+            resampled = df.resample('1Min', how={'buy':'ohlc', 'sell':'ohlc'})
             print(resampled)
 
             ## should we cose some trade?

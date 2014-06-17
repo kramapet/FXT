@@ -2,10 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import os
-import csv
+import io, csv, zipfile
 import re
+from datetime import datetime
 
 class LocalData():
+    TFX_DIR = 'TFX_data/'
+    
     def __init__(self):
         pass
 
@@ -13,21 +16,21 @@ class LocalData():
         database = {}
         for filename in sorted(os.listdir("TFX_data")):
             if re.match(r'[A-Z]{6}-\d{4}-\d{2}.zip', filename):
-                instrumnet, year, month = re.match(r'([A-Z]{6})-(\d{4})-(\d{2}).zip', filename).groups()
-                instrumnet = instrumnet.upper()
+                instrument, year, month = re.match(r'([A-Z]{6})-(\d{4})-(\d{2}).zip', filename).groups()
+                instrument = instrument.upper()
                 starting_date = datetime(int(year), int(month), 1)
-                database.setdefault(instrumnet, {}).setdefault(starting_date, filename)
+                database.setdefault(instrument, {}).setdefault(starting_date, filename)
         return database
 
-    def read_tfx_files(self, start_date, end_date, instrumnet):
+    def read_tfx_files(self, instrument, start_date, end_date):
         """
         Read the TFX
         """
         db = self._scan_tfx_directory()
-        filenames = [db[instrumnet][k] for k in sorted(db[instrumnet]) if end > k >= start]
+        filenames = [db[instrument][k] for k in sorted(db[instrument]) if end_date > k >= start_date]
 
         for filename in filenames:
-            with zipfile.ZipFile(self.TRUEFX_DIR + filename) as zip_file:
+            with zipfile.ZipFile(self.TFX_DIR + filename) as zip_file:
                 csv_file = io.TextIOWrapper(zip_file.open(zip_file.namelist()[0]))
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for i, row in enumerate(csv_reader):
@@ -35,6 +38,6 @@ class LocalData():
                     if start_date >= tick_datetime > end_date:
                         next
                     else:
-                        yield (tick_datetime, row[2], row[3])
+                        yield (tick_datetime, float(row[2]), float(row[3]))
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

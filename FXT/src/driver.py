@@ -19,7 +19,7 @@ class Driver():
         return TestBrokerLocal(account_balance=1000, start_date=datetime(2014, 4, 1), end_date=datetime.now())
 
     def init_model(self):
-        return MockModel('EUR_USD')
+        return MockModel('EURUSD')
 
     def start(self):
         self.model.trade(self.broker)

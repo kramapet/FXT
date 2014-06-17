@@ -5,6 +5,8 @@ from datetime import datetime
 
 from src.local_data import LocalData
 from src.stat import Stat
+from src.trade import Trade
+
 
 class TestBrokerLocal():
     def __init__(self, account_balance, start_date, end_date):
@@ -24,9 +26,9 @@ class TestBrokerLocal():
 
     def open(self, instrument, volume):
         if volume > 0:
-            price = last_tick[instrument][1]
+            price = self.last_tick[instrument][1]
         elif volume < 0:
-            price = last_tick[instrument][2]
+            price = self.last_tick[instrument][2]
 
         self.wallet -= price * abs(volume)
 
@@ -34,11 +36,11 @@ class TestBrokerLocal():
 
     def close(self, trade):
         if trade.volume > 0:
-            price = last_tick[instrument][2]
-        elif volume < 0:
-            price = last_tick[instrument][1]
+            price = self.last_tick[trade.instrument][2]
+        elif trade.volume < 0:
+            price = self.last_tick[trade.instrument][1]
 
-        self.wallet += price * abs(volume)
+        self.wallet += price * abs(trade.volume)
 
     def get_account_state(self):
         return self.wallet
