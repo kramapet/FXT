@@ -16,7 +16,7 @@ class Driver():
         self.model = self.init_model()
 
     def init_broker(self):
-        return TestBrokerLocal(account_balance=1000, start_date=datetime(2014, 4, 1), end_date=datetime.now())
+        return TestBrokerLocal(account_balance=1000, margin_rate=0.05, start_date=datetime(2014, 4, 1), end_date=datetime.now())
 
     def init_model(self):
         return MockModel('EURUSD')

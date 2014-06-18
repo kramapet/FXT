@@ -9,7 +9,7 @@ from src.trade import Trade
 
 
 class TestBrokerLocal():
-    def __init__(self, account_balance, start_date, end_date):
+    def __init__(self, account_balance, margin_rate, start_date, end_date):
         self.wallet = account_balance
         self.test_data = {'start_date':start_date, 'end_date':end_date}
 
@@ -30,9 +30,10 @@ class TestBrokerLocal():
         elif volume < 0:
             price = self.last_tick[instrument][2]
 
-        self.wallet -= price * abs(volume)
-
-        return Trade(instrument, volume, price)
+        trade = Trade(instrument, volume, price, self.margin_rate)
+        self.wallet -= trade.margin
+        
+        return trade
 
     def close(self, trade):
         if trade.volume > 0:
@@ -40,12 +41,17 @@ class TestBrokerLocal():
         elif trade.volume < 0:
             price = self.last_tick[trade.instrument][1]
 
-        self.wallet += price * abs(trade.volume)
+        self.wallet += trade.margin
+        self.wallet += trade.get_profit(price)
+
+    def get_account_info(self):
+        self.margin_rate = 0.05
+        self.account_currency = 'EUR'
 
     def get_account_state(self):
-        return self.wallet
+        self.wallet = 1000
 
-    def get_active_trades(self, instrumnet):
-        pass
+    def get_active_trades(self):
+        return []
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

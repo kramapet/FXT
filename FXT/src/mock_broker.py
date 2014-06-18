@@ -4,6 +4,7 @@
 from datetime import datetime
 
 from src.stat import Stat
+from src.trade import Trade
 
 class MockBroker():
     def __init__(self):
@@ -26,10 +27,18 @@ class MockBroker():
     def close(self, trade):
         pass
 
-    def get_account_state(self):
+    def get_exchange_rate(self, currency1, currency2):
         pass
 
-    def get_active_trades(self, instrument):
-        pass
+    def get_account_info(self):
+        self.margin_rate = 0.05
+        self.account_currency = 'EUR'
+
+    def get_account_state(self):
+        self.wallet = 1000
+        self.trades = self.get_active_trades()
+
+    def get_active_trades(self):
+        return []
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
