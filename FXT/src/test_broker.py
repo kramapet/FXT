@@ -32,7 +32,7 @@ class TestBrokerLocal():
 
         trade = Trade(instrument, volume, price, self.margin_rate)
         self.wallet -= trade.margin
-        
+
         return trade
 
     def close(self, trade):
@@ -43,9 +43,6 @@ class TestBrokerLocal():
 
         self.wallet += trade.margin
         self.wallet += trade.get_profit(price)
-
-    def get_instrument_rates(self, instrument):
-        return 1.25
 
     def get_account_info(self):
         self.margin_rate = 0.05

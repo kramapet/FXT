@@ -27,9 +27,6 @@ class MockBroker():
     def close(self, trade):
         pass
 
-    def get_instrument_rates(self, instrument):
-        pass
-
     def get_account_info(self):
         self.margin_rate = 0.05
         self.account_currency = 'EUR'
