@@ -27,7 +27,7 @@ class MockBroker():
     def close(self, trade):
         pass
 
-    def get_exchange_rate(self, currency1, currency2):
+    def get_instrument_rates(self, instrument):
         pass
 
     def get_account_info(self):

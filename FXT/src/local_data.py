@@ -18,6 +18,7 @@ class LocalData():
             if re.match(r'[A-Z]{6}-\d{4}-\d{2}.zip', filename):
                 instrument, year, month = re.match(r'([A-Z]{6})-(\d{4})-(\d{2}).zip', filename).groups()
                 instrument = instrument.upper()
+                instrument = (instrument[:3], instrument[-3:])
                 starting_date = datetime(int(year), int(month), 1)
                 database.setdefault(instrument, {}).setdefault(starting_date, filename)
         return database
