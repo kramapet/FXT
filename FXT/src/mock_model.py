@@ -12,16 +12,6 @@ class MockModel(Model):
     def train(self, instrument, train_data):
         pass
 
-    def get_volume_for_price(self, broker, price, instrument_rate):
-        """
-        Get trade volume for given amount of money (broker.account_currency)
-        equation used:
-            profit = (Closing Rate - Opening Rate) * (Closing {quote}/{home currency}) * Units
-        """
-        conversion_rate = broker.get_tick_data((instrument[1], broker.account_currency))
-        volume = price / (instrument_rate * conversion_rate)
-        return volume
-
     def trade(self, broker):
         for tick in broker.get_tick_data(self.instrument):
             self.buffer.append(tick)

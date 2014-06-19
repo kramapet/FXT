@@ -27,6 +27,17 @@ class MockBroker():
     def close(self, trade):
         pass
 
+    def convert_currency(self, instrument, base_volume, rate=None):
+        if rate:
+            return base_volume * rate
+        else:
+            tick = self.get_tick_data(instrument)
+
+            if base_volume > 0: # buy
+                return tick[1] * abs(base_volume)
+            else: # sell
+                return tick[2] * base_volume
+
     def get_account_info(self):
         self.margin_rate = 0.05
         self.account_currency = 'EUR'
