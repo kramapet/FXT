@@ -12,8 +12,9 @@ class TestBrokerLocal():
     def __init__(self, account_balance, margin_rate, start_date, end_date):
         self.wallet = account_balance
         self.test_data = {'start_date':start_date, 'end_date':end_date}
+        self.margin_rate = margin_rate
 
-        self.stat = Stat()
+        self.stat = Stat(account_balance)
         self.local_data = LocalData()
 
         self.last_tick = {}
@@ -43,6 +44,9 @@ class TestBrokerLocal():
 
         self.wallet += trade.margin
         self.wallet += trade.get_profit(price)
+
+        trade.close(price)
+        self.stat.add_trade(trade)
 
     def convert_currency(self, instrument, base_volume, rate=None):
         if rate:
