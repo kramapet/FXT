@@ -55,6 +55,49 @@ class TestBrokerLocal():
             else: # sell
                 return tick[2] * base_volume
 
+    def close_finished_trades(self, trades):
+        """
+        Checks for sl/tp out. This method simulates what the real broker does and must
+        be called from model after processing each new tick..
+        TODO: trailing stoploss
+        Arguments:
+            trades list of all trades the model has opened
+        Returns:
+            list of trades left open
+        """
+        left_trades = []
+        for trade in trades:
+            if trade.volume > 0:
+                if trade.sl:
+                    if self.last_tick[trade.instrument] <= trade.sl:
+                        self.close(trade)
+                    else:
+                        left_trades.append(trade)
+                if self.tp:
+                    if self.last_tick[trade.instrument] >= trade.tp:
+                        self.close(trade)
+                    else:
+                        left_trades.append(trade)
+            else:
+                if trade.sl:
+                    if self.last_tick[trade.instrument] >= trade.sl:
+                        self.close(trade)
+                    else:
+                        left_trades.append(trade)
+                if self.tp:
+                    if self.last_tick[trade.instrument] <= trade.tp:
+                        self.close(trade)
+                    else:
+                        left_trades.append(trade)
+        return left_trades
+
+    def get_pips(self, instrument, rate1, rate2):
+        if instrument[0] == 'JPY' or instrument[1] == 'JPY':
+            pip = 0.01
+        else:
+            pip = 0.0001
+        return int((rate2 - rate1) / pip)
+
     def get_account_info(self):
         self.margin_rate = 0.05
         self.account_currency = 'EUR'
