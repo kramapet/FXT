@@ -19,7 +19,7 @@ class MockModel(Model):
             # create pandas dataframe and resample data to 5s - example :-)
             df = pd.DataFrame(list(self.buffer), columns=['datetime', 'buy', 'sell'])
             df.set_index('datetime', inplace=True)
-            resampled = df.resample('1Min', how={'buy':'ohlc', 'sell':'ohlc'})
+            resampled = df.resample('5Min', how={'buy':'ohlc', 'sell':'ohlc'})
             print(resampled)
 
             ## should we cose some trade?

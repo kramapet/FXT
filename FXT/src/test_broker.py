@@ -42,10 +42,11 @@ class TestBrokerLocal():
         elif trade.volume < 0:
             price = self.last_tick[trade.instrument][1]
 
-        self.wallet += trade.margin
-        self.wallet += trade.get_profit(price)
-
         trade.close(price)
+
+        self.wallet += trade.margin
+        self.wallet += trade.get_profit()
+
         self.stat.add_trade(trade)
 
     def convert_currency(self, instrument, base_volume, rate=None):
