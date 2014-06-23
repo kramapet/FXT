@@ -25,5 +25,12 @@
         "import" : "src.mock_broker",
         "class" : "MockBroker",
         "params" : ""
+    },
+    "oanda_broker" : {
+        "import" : "src.brokers.oanda_broker",
+        "class" : "OandaBroker",
+        "params" : {
+			"enviroment" : "'sandbox'"
+        }
     }
 }

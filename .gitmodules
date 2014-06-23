@@ -1,0 +1,3 @@
+[submodule "FXT/src/thirdparty/oandapy"]
+	path = FXT/src/thirdparty/oandapy
+	url = https://github.com/oanda/oandapy.git
