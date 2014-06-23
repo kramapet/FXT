@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import importlib
 from datetime import datetime
 
 from src.mock_broker import MockBroker
@@ -14,23 +15,22 @@ class Driver():
     def __init__(self):
         self.config = self.read_config()
 
-        self.broker = self.init_module('test_broker')
-        self.model = self.init_module('model')
+        self.broker = self.init_module(self.config['use']['broker'])
+        self.model = self.init_module(self.config['use']['model'])
 
     def read_config(self):
         with open('config.json', 'r') as config:
             config = json.load(config)
-        return config
+            return config
 
-    def init_module(self, module):
-        import_string = "from " + self.config[module]['import'] + \
-                        " import " + self.config[module]['class']
+    def init_module(self, module_str):
+        module = importlib.import_module(self.config[module_str]['import'])
+
         params = ""
-        for param_name in self.config[module]['params']:
-            params += param_name + "=" + str(self.config[module]['params'][param_name]) + ", "
+        for param_name in self.config[module_str]['params']:
+            params += param_name + "=" + str(self.config[module_str]['params'][param_name]) + ", "
 
-        exec(import_string)
-        return eval(self.config[module]['class'] + "(" + params[:-2] + ")")
+        return eval("module." + self.config[module_str]['class'] +"(" + params[:-2] + ")")
 
     def start(self):
         self.model.trade(self.broker)
