@@ -5,6 +5,7 @@ import os
 import io, csv, zipfile
 import re
 from datetime import datetime
+from collections import namedtuple
 
 class LocalData():
     TFX_DIR = 'TFX_data/'
@@ -30,15 +31,17 @@ class LocalData():
         db = self._scan_tfx_directory()
         filenames = [db[instrument][k] for k in sorted(db[instrument]) if end_date > k >= start_date]
 
+        Tick = namedtuple("Tick", "datetime buy sell")
+
         for filename in filenames:
             with zipfile.ZipFile(self.TFX_DIR + filename) as zip_file:
                 csv_file = io.TextIOWrapper(zip_file.open(zip_file.namelist()[0]))
                 csv_reader = csv.reader(csv_file, delimiter=',')
-                for i, row in enumerate(csv_reader):
+                for row in csv_reader:
                     tick_datetime = datetime.strptime(row[1], '%Y%m%d %H:%M:%S.%f')
                     if start_date >= tick_datetime > end_date:
                         next
                     else:
-                        yield (tick_datetime, float(row[2]), float(row[3]))
+                        yield Tick(tick_datetime, float(row[2]), float(row[3]))
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

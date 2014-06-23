@@ -27,9 +27,9 @@ class TestBrokerLocal():
 
     def open(self, instrument, volume):
         if volume > 0:
-            price = self.last_tick[instrument][1]
+            price = self.last_tick[instrument].buy
         elif volume < 0:
-            price = self.last_tick[instrument][2]
+            price = self.last_tick[instrument].sell
 
         trade = Trade(instrument, volume, price, self.margin_rate)
         self.wallet -= trade.margin
@@ -38,9 +38,9 @@ class TestBrokerLocal():
 
     def close(self, trade):
         if trade.volume > 0:
-            price = self.last_tick[trade.instrument][2]
+            price = self.last_tick[trade.instrument].sell
         elif trade.volume < 0:
-            price = self.last_tick[trade.instrument][1]
+            price = self.last_tick[trade.instrument].buy
 
         trade.close(price)
 
@@ -56,9 +56,9 @@ class TestBrokerLocal():
             tick = self.get_tick_data(instrument)
 
             if base_volume > 0: # buy
-                return tick[1] * base_volume
+                return tick.buy * base_volume
             else: # sell
-                return tick[2] * abs(base_volume)
+                return tick.sell * abs(base_volume)
 
     def close_finished_trades(self, trades):
         """
