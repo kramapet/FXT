@@ -4,7 +4,7 @@
 		"model" : "mock_model"
 	},
     "mock_model" : {
-        "import" : "src.mock_model",
+        "import" : "src.models.mock_model",
         "class" : "MockModel",
         "params" : {
             "instrument" : "('EUR', 'USD')",
@@ -12,7 +12,7 @@
         }
     },
     "test_broker" : {
-        "import" : "src.test_broker",
+        "import" : "src.brokers.test_broker",
         "class" : "TestBrokerLocal",
         "params" : {
             "account_balance" : 1000,
@@ -22,7 +22,7 @@
         }
     },
     "mock_broker" : {
-        "import" : "src.mock_broker",
+        "import" : "src.brokers.mock_broker",
         "class" : "MockBroker",
         "params" : ""
     },

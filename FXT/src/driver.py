@@ -5,9 +5,6 @@ import json
 import importlib
 from datetime import datetime
 
-from src.mock_broker import MockBroker
-from src.test_broker import TestBrokerLocal
-
 class Driver():
     """
     Driver takes care of selecting model, broker and regime
