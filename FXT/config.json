@@ -1,6 +1,6 @@
 {
 	"use" : {
-		"broker" : "test_broker",
+		"broker" : "oanda_broker",
 		"model" : "mock_model"
 	},
     "mock_model" : {
@@ -30,7 +30,9 @@
         "import" : "src.brokers.oanda_broker",
         "class" : "OandaBroker",
         "params" : {
-			"enviroment" : "'sandbox'"
+			"enviroment" : "'sandbox'",
+			"username" : "'CHANGEME'",
+			"access_token" : "None"
         }
     }
 }

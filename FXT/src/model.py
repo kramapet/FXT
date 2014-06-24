@@ -16,8 +16,8 @@ class Model(metaclass=ABCMeta):
     def train(self, train_data):
         pass
 
-    def open_position(self, broker, instrument, volume):
-        trade = broker.open(instrument, volume)
+    def open_position(self, broker, instrument, volume, **args):
+        trade = broker.open(instrument, volume, args)
         self.trades.append(trade)
 
     def close_position(self, broker, trade):

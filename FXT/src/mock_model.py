@@ -13,6 +13,9 @@ class MockModel(Model):
         pass
 
     def trade(self, broker):
+        # actualize open trades
+        self.trades = broker.get_open_trades()
+
         for tick in broker.get_tick_data(self.instrument):
             self.buffer.append(tick)
 
@@ -23,14 +26,16 @@ class MockModel(Model):
             print(resampled)
 
             ## should we cose some trade?
-            #for trade in trades:
+            #for trade in self.trades:
             #   self.close_position(broker, trade)
 
             ## should we open some new trade?
             # do the magic and return 0/vlume/-volume
             # volume = xxx
-            # self.open_position(broker, self.instrument, volume)
+            #self.open_position(broker, self.instrument, -1)
 
+            #broker.get_account_information()
 
+            #print(broker)
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

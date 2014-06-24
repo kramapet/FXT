@@ -4,10 +4,10 @@
 import pandas as pd
 
 class Stat():
-    def __init__(self, init_account_balance):
+    def __init__(self, balance):
         self.buffer = []
         self.trades = []
-        self.initial_account_balance = init_account_balance
+        self.initial_account_balance = balance
 
     def add_tick(self, tick):
         self.buffer.append(tick)
