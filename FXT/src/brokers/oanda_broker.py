@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, timedelta
+from time import sleep
 from collections import namedtuple
 
 import src.thirdparty.oandapy.oandapy as oandapy
@@ -11,11 +12,24 @@ from src.trade import Trade
 Tick = namedtuple("Tick", "datetime buy sell")
 
 class OandaBroker():
-    def __init__(self, enviroment, username, access_token=None):
+    def __init__(self, enviroment, username, access_token=None, rate_freq_ms=500):
+        """
+        :param enviroment: the environment for oanda's REST api, either 'sandbox', 'practice', or 'live'.
+        :param username: username for Oanda broker
+        :param access_token: a valid access token if you have one. This is required if the environment is not sandbox.
+        :param rate_freq_ms: how often should be the server asked to get new rates in milliseconds. Default: 500
+        """
+        # connect to the broker
         self.oanda = oandapy.API(environment=enviroment, access_token=access_token)
 
+        # get basic account info
         self.get_account(username=username)
         self.get_account_information()
+
+        # rates streaming
+        self.rate_freq = timedelta(milliseconds=rate_freq_ms)
+        self.sleep_time = (rate_freq_ms / 1000.0) / 10.0
+        self.last_tick_datetime = datetime.now()
 
         self.stat = Stat(self.balance)
 
@@ -37,9 +51,14 @@ class OandaBroker():
 
     def get_tick_data(self, instrument):
         while(1):
-            response = self.oanda.get_prices(instruments=instrument[0] + "_" + instrument[1])
-            t = response.get("prices")[0]
-            yield Tick(self._str2datetime(t['time']), t['ask'], t['bid'])
+            now = datetime.now()
+            if now - self.last_tick_datetime >= self.rate_freq:
+                self.last_tick_datetime = now
+                response = self.oanda.get_prices(instruments=instrument[0] + "_" + instrument[1])
+                t = response.get("prices")[0]
+                yield Tick(self._str2datetime(t['time']), t['ask'], t['bid'])
+            else:
+                sleep(self.sleep_time) # don't let the CPU grind so much
 
     def open(self, instrument, volume, order_type='market', expiry=None, **args):  # price=None, lower_bound=None, upper_bound=None, sl=None, tp=None, ts=None):
         if expiry is None:

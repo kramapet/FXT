@@ -32,7 +32,8 @@
         "params" : {
 			"enviroment" : "'sandbox'",
 			"username" : "'CHANGEME'",
-			"access_token" : "None"
+			"access_token" : "None",
+			"rate_freq_ms" : 500
         }
     }
 }
