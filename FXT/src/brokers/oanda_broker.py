@@ -112,11 +112,11 @@ class OandaBroker():
         if rate:
             return base_volume * rate
         else:
-            tick = self.get_tick_data(instrument)
-            if base_volume > 0:  # buy
-                return tick[1] * base_volume
-            else:  # sell
-                return tick[2] * abs(base_volume)
+            tick = self.get_tick_data(instrument).next()
+            if base_volume > 0:
+                return tick.buy * base_volume
+            else:
+                return tick.sell * abs(base_volume)
 
     def get_account(self, username):
         response = self.oanda.get_accounts(username=username)
