@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
 from datetime import datetime, timedelta
 from time import sleep
 from collections import namedtuple
 
-import src.thirdparty.oandapy.oandapy as oandapy
+from src.thirdparty.oandapy import oandapy
 from src.stat import Stat
 from src.trade import Trade
 
 Tick = namedtuple("Tick", "datetime buy sell")
 
 class OandaBroker():
-    def __init__(self, enviroment, username, access_token=None, rate_freq_ms=500):
+    def __init__(self, enviroment, username, access_token=None, tick_freq_ms=500, log_level='WARNING'):
         """
         :param enviroment: the environment for oanda's REST api, either 'sandbox', 'practice', or 'live'.
         :param username: username for Oanda broker
         :param access_token: a valid access token if you have one. This is required if the environment is not sandbox.
-        :param rate_freq_ms: how often should be the server asked to get new rates in milliseconds. Default: 500
+        :param tick_freq_ms: how often should be the server asked to get new rates in milliseconds. Default: 500
         """
         # connect to the broker
         self.oanda = oandapy.API(environment=enviroment, access_token=access_token)
@@ -27,11 +28,13 @@ class OandaBroker():
         self.get_account_information()
 
         # rates streaming
-        self.rate_freq = timedelta(milliseconds=rate_freq_ms)
-        self.sleep_time = (rate_freq_ms / 1000.0) / 10.0
+        self.rate_freq = timedelta(milliseconds=tick_freq_ms)
         self.last_tick_datetime = datetime.now()
 
         self.stat = Stat(self.balance)
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel('DEBUG')
 
     def __str__(self):
         ret = "OANDA broker"
@@ -57,14 +60,13 @@ class OandaBroker():
                 response = self.oanda.get_prices(instruments=instrument[0] + "_" + instrument[1])
                 t = response.get("prices")[0]
                 yield Tick(self._str2datetime(t['time']), t['ask'], t['bid'])
-            else:
-                sleep(self.sleep_time) # don't let the CPU grind so much
 
     def open(self, instrument, volume, order_type='market', expiry=None, **args):  # price=None, lower_bound=None, upper_bound=None, sl=None, tp=None, ts=None):
         if expiry is None:
             expiry = datetime.now() + timedelta(days=1)
             expiry = expiry.isoformat("T") + "Z"
 
+        self.logger.debug('trade open called')
         response = self.oanda.create_order(self.account_id,
             instrument=instrument[0] + "_" + instrument[1],
             units=abs(volume),
@@ -73,6 +75,7 @@ class OandaBroker():
             expiry=expiry,
             **{k:v for k, v in args.items() if v is not None}
         )
+        self.logger.debug('trade open carried out')
 
         if response['tradeOpened']:
             return Trade(instrument=instrument,
@@ -85,15 +88,16 @@ class OandaBroker():
                          id=response['tradeOpened']['id'],
                          open_datetime=self._str2datetime(response['time']))
         elif response['tradesClosed']:
-            print("When opening trade, 'tradesClosed' returned. This is not implemented, careful!!!")
+            self.logger.critical("When opening trade, 'tradesClosed' returned. This is not implemented, careful!!!")
             return None
         elif response['tradeReduced']:
-            print("When opening trade, 'tradeReduced' returned. This is not implemented, careful!!!")
+            self.logger.critical("When opening trade, 'tradeReduced' returned. This is not implemented, careful!!!")
             return None
 
     def close(self, trade):
-        # try to close trade
+        self.logger.debug('trade close called')
         response = self.oanda.close_trade(self.account_id, trade.id)
+        self.logger.info('trade close carried out')
 
         # if the trade was found
         if 'code' not in response:
@@ -103,7 +107,9 @@ class OandaBroker():
             self.stat.add_trade(trade)
         else:
             # try to close order
+            self.logger.debug('order close')
             response = self.oanda.close_order(self.account_id, trade.id)
+            self.logger.info('order close carried out')
             trade = None
         return trade
 
