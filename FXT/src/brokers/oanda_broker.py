@@ -34,7 +34,7 @@ class OandaBroker():
         self.stat = Stat(self.balance)
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel('DEBUG')
+        self.logger.setLevel(log_level)
 
     def __str__(self):
         ret = "OANDA broker"
@@ -71,7 +71,7 @@ class OandaBroker():
             instrument=instrument[0] + "_" + instrument[1],
             units=abs(volume),
             side='buy' if volume > 0 else 'sell',
-            type='market',
+            type=order_type,
             expiry=expiry,
             **{k:v for k, v in args.items() if v is not None}
         )

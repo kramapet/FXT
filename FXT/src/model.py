@@ -16,13 +16,17 @@ class Model(metaclass=ABCMeta):
     def train(self, train_data):
         pass
 
-    def open_position(self, broker, instrument, volume, **args):
-        trade = broker.open(instrument, volume, args)
-        self.trades.append(trade)
+    def open_position(self, broker, instrument, volume, order_type='market', expiry=None, **args):
+        trade = broker.open(instrument, volume, order_type, expiry, **args)
+        if trade:
+            self.trades.append(trade)
+        return trade
 
     def close_position(self, broker, trade):
-        broker.close(trade)
-        self.trades.remove(trade)
+        ret = broker.close(trade)
+        if trade:
+            self.trades.remove(trade)
+        return ret
 
     @abstractmethod
     def trade(self, broker):
