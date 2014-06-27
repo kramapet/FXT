@@ -21,6 +21,19 @@
             "end_date" : "datetime.now()"
         }
     },
+    "test_broker_real" : {
+        "import" : "src.brokers.test_broker",
+        "class" : "TestBrokerReal",
+        "params" : {
+			"real_broker_import" : "'src.brokers.oanda_broker'",
+			"real_broker_class" : "'OandaBroker'",
+			"enviroment" : "'sandbox'",
+			"username" : "'CHANGEME'",
+            "account_balance" : 1000,
+            "margin_rate" : 0.05,
+            "log_level" : "'DEBUG'"
+        }
+    },
     "mock_broker" : {
         "import" : "src.brokers.mock_broker",
         "class" : "MockBroker",
@@ -33,7 +46,8 @@
 			"enviroment" : "'sandbox'",
 			"username" : "'CHANGEME'",
 			"access_token" : "None",
-			"rate_freq_ms" : 500
+			"tick_freq_ms" : 500,
+            "log_level" : "'DEBUG'"
         }
     }
 }

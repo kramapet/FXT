@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import importlib
 from datetime import datetime
 
 from src.local_data import LocalData
@@ -164,5 +165,23 @@ class TestBrokerLocal():
 
     def get_open_trades(self):
         return []
+
+class TestBrokerReal(TestBrokerLocal):
+    def __init__(self, real_broker_import, real_broker_class, enviroment, username, # mandatory real broker parameters
+                 account_balance, margin_rate, start_date=None, end_date=None, account_currency="EUR", log_level='WARNING',
+                 access_token=None, tick_freq_ms=500): # real broker optional parameters
+        super(TestBrokerReal, self).__init__(account_balance, margin_rate, start_date, end_date, account_currency=account_currency, log_level=log_level)
+
+        module = importlib.import_module(real_broker_import)
+        self.real_broker = eval("module.{0}('{1}', '{2}', access_token={3}, tick_freq_ms={4}, log_level='{5}')".format(real_broker_class, enviroment, username, access_token, tick_freq_ms, log_level))
+
+    def get_tick_data(self, instrument):
+        for tick in self.real_broker.get_tick_data(instrument):
+            self.stat.add_tick(tick)
+            self.last_tick[instrument] = tick
+
+            # close finished sl/tp trades
+            self.open_trades_list = self.close_finished_trades(self.open_trades_list)
+            yield tick
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
