@@ -29,7 +29,8 @@ class TestBrokerLocal():
         self.realized_pl = 0
         self.unrealized_pl = 0
 
-        self.test_data = {'start_date':start_date, 'end_date':end_date}
+        self.test_data = {'start_date':datetime(**start_date) if isinstance(start_date, dict) else datetime.now(),
+                          'end_date':datetime(**end_date) if isinstance(end_date, dict) else datetime.now()}
         self.local_data = LocalData()
 
         self.stat = Stat(account_balance)
@@ -173,7 +174,7 @@ class TestBrokerReal(TestBrokerLocal):
         super(TestBrokerReal, self).__init__(account_balance, margin_rate, start_date, end_date, account_currency=account_currency, log_level=log_level)
 
         module = importlib.import_module(real_broker_import)
-        self.real_broker = eval("module.{0}('{1}', '{2}', access_token={3}, tick_freq_ms={4}, log_level='{5}')".format(real_broker_class, enviroment, username, access_token, tick_freq_ms, log_level))
+        self.real_broker = getattr(module, real_broker_class)(enviroment, username, access_token=access_token, tick_freq_ms=tick_freq_ms, log_level=log_level)
 
     def get_tick_data(self, instrument):
         for tick in self.real_broker.get_tick_data(instrument):

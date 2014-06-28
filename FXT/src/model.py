@@ -9,7 +9,7 @@ class Model(metaclass=ABCMeta):
     def __init__(self, instrument, pricebuffer_size=1000):
         self.buffer = PriceBuffer(size=pricebuffer_size)
 
-        self.instrument = instrument
+        self.instrument = tuple(instrument)
         self.trades = []
 
     @abstractmethod

@@ -22,12 +22,7 @@ class Driver():
 
     def init_module(self, module_str):
         module = importlib.import_module(self.config[module_str]['import'])
-
-        params = ""
-        for param_name in self.config[module_str]['params']:
-            params += param_name + "=" + str(self.config[module_str]['params'][param_name]) + ", "
-
-        return eval("module." + self.config[module_str]['class'] +"(" + params[:-2] + ")")
+        return getattr(module, self.config[module_str]['class'])(**self.config[module_str]['params'])
 
     def start(self):
         self.model.trade(self.broker)

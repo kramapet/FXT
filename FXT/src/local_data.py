@@ -9,7 +9,7 @@ from collections import namedtuple
 
 class LocalData():
     TFX_DIR = 'TFX_data/'
-    
+
     def __init__(self):
         pass
 

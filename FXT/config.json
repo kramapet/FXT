@@ -1,13 +1,13 @@
 {
-	"use" : {
-		"broker" : "oanda_broker",
-		"model" : "mock_model"
-	},
+    "use" : {
+        "broker" : "test_broker_real",
+        "model" : "mock_model"
+    },
     "mock_model" : {
         "import" : "src.models.mock_model",
         "class" : "MockModel",
         "params" : {
-            "instrument" : "('EUR', 'USD')",
+            "instrument" : ["EUR","USD"],
             "pricebuffer_size" : 1000
         }
     },
@@ -17,21 +17,25 @@
         "params" : {
             "account_balance" : 1000,
             "margin_rate" : 0.05,
-            "start_date" : "datetime(2014, 4, 1)",
-            "end_date" : "datetime.now()"
+            "start_date" : {
+                "year" : 2014,
+                "month" : 4,
+                "day" : 1
+            },
+            "end_date" : ""
         }
     },
     "test_broker_real" : {
         "import" : "src.brokers.test_broker",
         "class" : "TestBrokerReal",
         "params" : {
-			"real_broker_import" : "'src.brokers.oanda_broker'",
-			"real_broker_class" : "'OandaBroker'",
-			"enviroment" : "'sandbox'",
-			"username" : "'CHANGEME'",
+            "real_broker_import" : "src.brokers.oanda_broker",
+            "real_broker_class" : "OandaBroker",
+            "enviroment" : "sandbox",
+            "username" : "CHANGEME",
             "account_balance" : 1000,
             "margin_rate" : 0.05,
-            "log_level" : "'DEBUG'"
+            "log_level" : "DEBUG"
         }
     },
     "mock_broker" : {
@@ -43,11 +47,11 @@
         "import" : "src.brokers.oanda_broker",
         "class" : "OandaBroker",
         "params" : {
-			"enviroment" : "'sandbox'",
-			"username" : "'CHANGEME'",
-			"access_token" : "None",
-			"tick_freq_ms" : 500,
-            "log_level" : "'DEBUG'"
+            "enviroment" : "sandbox",
+            "username" : "CHANGEME",
+            "access_token" : "None",
+            "tick_freq_ms" : 500,
+            "log_level" : "DEBUG"
         }
     }
 }
