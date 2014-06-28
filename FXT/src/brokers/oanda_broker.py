@@ -13,7 +13,7 @@ from src.trade import Trade
 Tick = namedtuple("Tick", "datetime buy sell")
 
 class OandaBroker():
-    def __init__(self, enviroment, username, access_token=None, tick_freq_ms=500, log_level='WARNING'):
+    def __init__(self, enviroment, username, access_token=None, tick_freq_ms=500):
         """
         :param enviroment: the environment for oanda's REST api, either 'sandbox', 'practice', or 'live'.
         :param username: username for Oanda broker
@@ -34,7 +34,6 @@ class OandaBroker():
         self.stat = Stat(self.balance)
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(log_level)
 
     def __str__(self):
         ret = "OANDA broker"

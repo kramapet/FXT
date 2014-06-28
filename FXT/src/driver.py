@@ -3,6 +3,7 @@
 
 import json
 import importlib
+import logging
 from datetime import datetime
 
 class Driver():
@@ -14,6 +15,8 @@ class Driver():
 
         self.broker = self.init_module(self.config['use']['broker'])
         self.model = self.init_module(self.config['use']['model'])
+
+        logging.basicConfig(format=self.config['use']['log_format'], level=self.config['use']['log_level'])
 
     def read_config(self):
         with open('config.json', 'r') as config:

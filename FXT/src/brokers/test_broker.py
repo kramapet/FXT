@@ -11,7 +11,7 @@ from src.trade import Trade
 
 
 class TestBrokerLocal():
-    def __init__(self, account_balance, margin_rate, start_date, end_date, account_currency="EUR", log_level='WARNING'):
+    def __init__(self, account_balance, margin_rate, start_date, end_date, account_currency="EUR"):
         self.account_id = None
         self.account_name = 'Local test'
         self.account_currency = account_currency
@@ -37,7 +37,6 @@ class TestBrokerLocal():
         self.last_tick = {}
 
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel('DEBUG')
 
     def __str__(self):
         ret = "Local test broker"
@@ -169,12 +168,12 @@ class TestBrokerLocal():
 
 class TestBrokerReal(TestBrokerLocal):
     def __init__(self, real_broker_import, real_broker_class, enviroment, username, # mandatory real broker parameters
-                 account_balance, margin_rate, start_date=None, end_date=None, account_currency="EUR", log_level='WARNING',
+                 account_balance, margin_rate, start_date=None, end_date=None, account_currency="EUR",
                  access_token=None, tick_freq_ms=500): # real broker optional parameters
-        super(TestBrokerReal, self).__init__(account_balance, margin_rate, start_date, end_date, account_currency=account_currency, log_level=log_level)
+        super(TestBrokerReal, self).__init__(account_balance, margin_rate, start_date, end_date, account_currency=account_currency)
 
         module = importlib.import_module(real_broker_import)
-        self.real_broker = getattr(module, real_broker_class)(enviroment, username, access_token=access_token, tick_freq_ms=tick_freq_ms, log_level=log_level)
+        self.real_broker = getattr(module, real_broker_class)(enviroment, username, access_token=access_token, tick_freq_ms=tick_freq_ms)
 
     def get_tick_data(self, instrument):
         for tick in self.real_broker.get_tick_data(instrument):

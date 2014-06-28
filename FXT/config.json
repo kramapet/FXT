@@ -1,7 +1,9 @@
 {
     "use" : {
         "broker" : "test_broker_real",
-        "model" : "mock_model"
+        "model" : "mock_model",
+        "log_level" : "DEBUG",
+        "log_format" : "%(asctime)s %(name)s: %(message)s"
     },
     "mock_model" : {
         "import" : "src.models.mock_model",
@@ -34,8 +36,7 @@
             "enviroment" : "sandbox",
             "username" : "CHANGEME",
             "account_balance" : 1000,
-            "margin_rate" : 0.05,
-            "log_level" : "DEBUG"
+            "margin_rate" : 0.05
         }
     },
     "mock_broker" : {
@@ -50,8 +51,7 @@
             "enviroment" : "sandbox",
             "username" : "CHANGEME",
             "access_token" : "None",
-            "tick_freq_ms" : 500,
-            "log_level" : "DEBUG"
+            "tick_freq_ms" : 500
         }
     }
 }
