@@ -1,6 +1,6 @@
 {
     "use" : {
-        "broker" : "test_broker_real",
+        "broker" : "test_broker",
         "model" : "mock_model",
         "log_level" : "DEBUG",
         "log_format" : "%(asctime)s %(name)s: %(message)s"
@@ -8,17 +8,17 @@
     "mock_model" : {
         "import" : "src.models.mock_model",
         "class" : "MockModel",
-        "params" : {
-            "instrument" : ["EUR","USD"],
-            "pricebuffer_size" : 1000
-        }
+        "instrument" : ["EUR","USD"],
+        "pricebuffer_size" : 1000
     },
     "test_broker" : {
         "import" : "src.brokers.test_broker",
         "class" : "TestBrokerLocal",
-        "params" : {
-            "account_balance" : 1000,
-            "margin_rate" : 0.05,
+        "account_balance" : 1000,
+        "margin_rate" : 0.05,
+        "tick_source": {
+            "import" : "src.local_data",
+            "class" : "LocalData",
             "start_date" : {
                 "year" : 2014,
                 "month" : 4,
@@ -27,31 +27,16 @@
             "end_date" : ""
         }
     },
-    "test_broker_real" : {
-        "import" : "src.brokers.test_broker",
-        "class" : "TestBrokerReal",
-        "params" : {
-            "real_broker_import" : "src.brokers.oanda_broker",
-            "real_broker_class" : "OandaBroker",
-            "enviroment" : "sandbox",
-            "username" : "CHANGEME",
-            "account_balance" : 1000,
-            "margin_rate" : 0.05
-        }
-    },
     "mock_broker" : {
         "import" : "src.brokers.mock_broker",
-        "class" : "MockBroker",
-        "params" : ""
+        "class" : "MockBroker"
     },
     "oanda_broker" : {
         "import" : "src.brokers.oanda_broker",
         "class" : "OandaBroker",
-        "params" : {
-            "enviroment" : "sandbox",
-            "username" : "CHANGEME",
-            "access_token" : "None",
-            "tick_freq_ms" : 500
-        }
+        "enviroment" : "sandbox",
+        "username" : "CHANGEME",
+        "access_token" : "None",
+        "tick_freq_ms" : 500
     }
 }

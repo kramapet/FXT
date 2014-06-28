@@ -24,8 +24,15 @@ class Driver():
             return config
 
     def init_module(self, module_str):
-        module = importlib.import_module(self.config[module_str]['import'])
-        return getattr(module, self.config[module_str]['class'])(**self.config[module_str]['params'])
+        module_config = self.config[module_str]
+        return self.init_module_config(module_config)
+
+    @staticmethod
+    def init_module_config(module_config):
+        params = {k:v for k,v in module_config.items() if k not in ['import', 'class']}
+
+        module = importlib.import_module(module_config['import'])
+        return getattr(module, module_config['class'])(**params)
 
     def start(self):
         self.model.trade(self.broker)

@@ -8,10 +8,10 @@ from datetime import datetime
 from src.local_data import LocalData
 from src.stat import Stat
 from src.trade import Trade
-
+from src.driver import Driver
 
 class TestBrokerLocal():
-    def __init__(self, account_balance, margin_rate, start_date, end_date, account_currency="EUR"):
+    def __init__(self, account_balance, margin_rate, tick_source, account_currency="EUR"):
         self.account_id = None
         self.account_name = 'Local test'
         self.account_currency = account_currency
@@ -29,9 +29,7 @@ class TestBrokerLocal():
         self.realized_pl = 0
         self.unrealized_pl = 0
 
-        self.test_data = {'start_date':datetime(**start_date) if isinstance(start_date, dict) else datetime.now(),
-                          'end_date':datetime(**end_date) if isinstance(end_date, dict) else datetime.now()}
-        self.local_data = LocalData()
+        self.tick_source = Driver.init_module_config(tick_source)
 
         self.stat = Stat(account_balance)
         self.last_tick = {}
@@ -52,7 +50,7 @@ class TestBrokerLocal():
         return ret
 
     def get_tick_data(self, instrument):
-        for tick in self.local_data.read_tfx_files(instrument, self.test_data['start_date'], self.test_data['end_date']):
+        for tick in self.tick_source.get_tick_data(instrument):
             self.stat.add_tick(tick)
             self.last_tick[instrument] = tick
 
@@ -165,23 +163,5 @@ class TestBrokerLocal():
 
     def get_open_trades(self):
         return []
-
-class TestBrokerReal(TestBrokerLocal):
-    def __init__(self, real_broker_import, real_broker_class, enviroment, username, # mandatory real broker parameters
-                 account_balance, margin_rate, start_date=None, end_date=None, account_currency="EUR",
-                 access_token=None, tick_freq_ms=500): # real broker optional parameters
-        super(TestBrokerReal, self).__init__(account_balance, margin_rate, start_date, end_date, account_currency=account_currency)
-
-        module = importlib.import_module(real_broker_import)
-        self.real_broker = getattr(module, real_broker_class)(enviroment, username, access_token=access_token, tick_freq_ms=tick_freq_ms)
-
-    def get_tick_data(self, instrument):
-        for tick in self.real_broker.get_tick_data(instrument):
-            self.stat.add_tick(tick)
-            self.last_tick[instrument] = tick
-
-            # close finished sl/tp trades
-            self.open_trades_list = self.close_finished_trades(self.open_trades_list)
-            yield tick
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

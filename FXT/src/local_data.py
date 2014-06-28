@@ -10,8 +10,9 @@ from collections import namedtuple
 class LocalData():
     TFX_DIR = 'TFX_data/'
 
-    def __init__(self):
-        pass
+    def __init__(self, start_date=None, end_date=None):
+        self.test_data = {'start_date':datetime(**start_date) if isinstance(start_date, dict) else datetime.now(),
+                          'end_date':datetime(**end_date) if isinstance(end_date, dict) else datetime.now()}
 
     def _scan_tfx_directory(self):
         database = {}
@@ -24,12 +25,12 @@ class LocalData():
                 database.setdefault(instrument, {}).setdefault(starting_date, filename)
         return database
 
-    def read_tfx_files(self, instrument, start_date, end_date):
+    def get_tick_data(self, instrument):
         """
         Read the TFX
         """
         db = self._scan_tfx_directory()
-        filenames = [db[instrument][k] for k in sorted(db[instrument]) if end_date > k >= start_date]
+        filenames = [db[instrument][k] for k in sorted(db[instrument]) if self.test_data['end_date'] > k >= self.test_data['start_date']]
 
         Tick = namedtuple("Tick", "datetime buy sell")
 
@@ -39,7 +40,7 @@ class LocalData():
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:
                     tick_datetime = datetime.strptime(row[1], '%Y%m%d %H:%M:%S.%f')
-                    if start_date >= tick_datetime > end_date:
+                    if self.test_data['start_date'] >= tick_datetime > self.test_data['end_date']:
                         next
                     else:
                         yield Tick(tick_datetime, float(row[2]), float(row[3]))
