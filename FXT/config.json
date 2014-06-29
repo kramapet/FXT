@@ -6,19 +6,16 @@
         "log_format" : "%(asctime)s %(name)s: %(message)s"
     },
     "mock_model" : {
-        "import" : "src.models.mock_model",
-        "class" : "MockModel",
+        "class" : "src.models.mock_model.MockModel",
         "instrument" : ["EUR","USD"],
         "pricebuffer_size" : 1000
     },
     "test_broker" : {
-        "import" : "src.brokers.test_broker",
-        "class" : "TestBrokerLocal",
+        "class" : "src.brokers.test_broker.TestBrokerLocal",
         "account_balance" : 1000,
         "margin_rate" : 0.05,
         "tick_source": {
-            "import" : "src.local_data",
-            "class" : "LocalData",
+            "class" : "src.local_data.LocalData",
             "start_date" : {
                 "year" : 2014,
                 "month" : 4,
@@ -28,12 +25,10 @@
         }
     },
     "mock_broker" : {
-        "import" : "src.brokers.mock_broker",
-        "class" : "MockBroker"
+        "class" : "src.brokers.mock_broker.MockBroker"
     },
     "oanda_broker" : {
-        "import" : "src.brokers.oanda_broker",
-        "class" : "OandaBroker",
+        "class" : "src.brokers.oanda_broker.OandaBroker",
         "enviroment" : "sandbox",
         "username" : "CHANGEME",
         "access_token" : "None",
