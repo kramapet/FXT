@@ -43,6 +43,6 @@ class LocalData():
                     if self.test_data['start_date'] >= tick_datetime > self.test_data['end_date']:
                         next
                     else:
-                        yield Tick(tick_datetime, float(row[2]), float(row[3]))
+                        yield Tick(tick_datetime, float(row[3]), float(row[2]))
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
