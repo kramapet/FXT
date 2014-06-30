@@ -55,7 +55,7 @@ class TestBrokerLocal():
             self.last_tick[instrument] = tick
 
             # close finished sl/tp trades
-            self.open_trades_list = self.close_finished_trades(self.open_trades_list)
+            #self.open_trades_list = self.close_finished_trades(self.open_trades_list)
 
             yield tick
 
@@ -70,9 +70,9 @@ class TestBrokerLocal():
                           volume=volume,
                           open_price=open_price,
                           open_datetime=self.last_tick[instrument].datetime)
-            trade_margin = (abs(volume) * open_price) * self.margin_rate
+            trade_margin = abs(volume) * self.margin_rate
             if self.margin_available - trade_margin < 0:
-                print("Not enough money to open the trade")
+                self.logger.warning("not enough money to open the trade")
                 return None
             else:
                 self.margin_available -= trade_margin
@@ -82,6 +82,7 @@ class TestBrokerLocal():
                 return trade
         else:
             self.logger.warning("oreder_type is not 'market' - not implemented yet")
+            return None
 
     def close(self, trade):
         if trade.volume > 0:
@@ -90,13 +91,14 @@ class TestBrokerLocal():
             close_price = self.last_tick[trade.instrument].buy
 
         trade.close(close_price, self.last_tick[trade.instrument].datetime)
-        trade_margin = (abs(trade.volume) * close_price) * self.margin_rate
+        trade_margin = abs(trade.volume) * self.margin_rate
 
         self.margin_available += trade_margin
         self.margin_used -= trade_margin
 
         # get profit
-        pl = (trade.close_rate - trade.open_rate) * abs(trade.volume)
+        pl = (trade.close_rate - trade.open_rate) * trade.volume
+        pl = round( pl * (1.0 / trade.close_rate), 4)
         self.realized_pl += pl
         self.balance += pl
         trade.set_profit(pl)
@@ -163,5 +165,53 @@ class TestBrokerLocal():
 
     def get_open_trades(self):
         return []
+
+class BrokerCompare(TestBrokerLocal):
+    def __init__(self, real_broker):
+        super().__init__(account_balance=None, margin_rate=None, tick_source=real_broker, account_currency=None)
+
+        # set local broker parameters to be the same as the real one
+        self.account_currency = self.tick_source.account_currency
+        self.margin_rate = self.tick_source.margin_rate
+        self.balance = self.tick_source.balance
+        self.margin_available = self.tick_source.margin_available
+        self.margin_used = self.tick_source.margin_used
+        self.realized_pl = self.tick_source.realized_pl
+        self.unrealized_pl = self.tick_source.unrealized_pl
+
+        self.trade_dict = {}
+
+    def __str__(self):
+        self.tick_source.get_account_information()
+        ret = "BROKER COMPARE OBJECT: \n"
+        ret += "account currency: " + str(self.tick_source.account_currency) + "\n"
+        ret += "REAL: balance: " + str(self.tick_source.balance) + "\n"
+        ret += "LOCAL: balance: " + str(self.balance) + "\n"
+        ret += "REAL: margin available: " + str(self.tick_source.margin_available) + "\n"
+        ret += "LOCAL: margin available: " + str(self.margin_available) + "\n"
+        ret += "REAL: margin used: " + str(self.tick_source.margin_used) + "\n"
+        ret += "LOCAL: margin used: " + str(self.margin_used) + "\n"
+        ret += "REAL: margin rate:  " + str(self.tick_source.margin_rate) + "\n"
+        ret += "LOCAL: margin rate:  " + str(self.margin_rate) + "\n"
+        ret += "REAL: realized pl: " + str(self.tick_source.realized_pl) + "\n"
+        ret += "LOCAL: realized pl: " + str(self.realized_pl) + "\n"
+        return ret
+
+    def open(self, instrument, volume, order_type='market', expiry=None, **args):
+        local = super().open(instrument, volume, order_type, expiry, **args)
+        real = self.tick_source.open(instrument, volume, order_type, expiry, **args)
+
+        self.trade_dict[local] = real
+        return local
+
+    def close(self, trade):
+        real_trade = self.trade_dict[trade]
+        real_trade_closed = self.tick_source.close(real_trade)
+        local_trade_closed = super().close(trade)
+        print("real:")
+        print(real_trade_closed)
+        print("local:")
+        print(local_trade_closed)
+        return local_trade_closed
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

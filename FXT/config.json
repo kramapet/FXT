@@ -33,5 +33,15 @@
         "username" : "CHANGEME",
         "access_token" : "None",
         "tick_freq_ms" : 500
+    },
+    "broker_compare" : {
+        "class" : "src.brokers.test_broker.BrokerCompare",
+        "real_broker" : {
+            "class" : "src.brokers.oanda_broker.OandaBroker",
+            "enviroment" : "sandbox",
+            "username" : "CHANGEME",
+            "access_token" : "None",
+            "tick_freq_ms" : 500
+        }
     }
 }

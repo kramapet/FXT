@@ -13,7 +13,8 @@ class Trade():
         self.open_rate = open_price
         self.open_datetime = open_datetime
         self.close_rate = "STILL OPEN"
-        self.close_rate = "STILL OPEN"
+        self.close_datetime = "STILL OPEN"
+        self.profit = "STILL OPEN"
         self.args = args
 
     def __str__(self):
@@ -27,7 +28,8 @@ class Trade():
         ret += "\topen rate: " + str(self.open_rate) + "\n"
         ret += "\topen datetime: " + str(self.open_datetime) + "\n"
         ret += "\tclose rate: " + str(self.close_rate) + "\n"
-        ret += "\tclose datetime: " + str(self.close_rate) + "\n"
+        ret += "\tclose datetime: " + str(self.close_datetime) + "\n"
+        ret += "\tprofit: " + str(self.profit) + "\n"
         return ret
 
     def close(self, close_price, close_datetime):
