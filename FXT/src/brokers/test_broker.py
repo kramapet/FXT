@@ -70,13 +70,17 @@ class TestBrokerLocal():
                           volume=volume,
                           open_price=open_price,
                           open_datetime=self.last_tick[instrument].datetime)
-            trade_margin = abs(volume) * self.margin_rate
-            if self.margin_available - trade_margin < 0:
+
+            # calculate margin and convert it to the account currency if needed
+            trade_margin = abs(trade.volume) * self.margin_rate
+            trade_margin_converted = self.convert_to_account_currency(trade_margin, trade.instrument[0])
+
+            if self.margin_available - trade_margin_converted < 0:
                 self.logger.warning("not enough money to open the trade")
                 return None
             else:
-                self.margin_available -= trade_margin
-                self.margin_used += trade_margin
+                self.margin_available -= trade_margin_converted
+                self.margin_used += trade_margin_converted
                 self.open_trades += 1
                 self.open_trades_list.append(trade)
                 return trade
@@ -91,14 +95,16 @@ class TestBrokerLocal():
             close_price = self.last_tick[trade.instrument].buy
 
         trade.close(close_price, self.last_tick[trade.instrument].datetime)
+
+        # calculate margin and convert it to the account currency if needed
         trade_margin = abs(trade.volume) * self.margin_rate
+        trade_margin_converted = self.convert_to_account_currency(trade_margin, trade.instrument[0])
+        self.margin_available += trade_margin_converted
+        self.margin_used -= trade_margin_converted
 
-        self.margin_available += trade_margin
-        self.margin_used -= trade_margin
-
-        # get profit
-        pl = (trade.close_rate - trade.open_rate) * trade.volume
-        pl = round( pl * (1.0 / trade.close_rate), 4)
+        # get profit in quote currency and convert it to the base currency
+        quote_pl = (trade.close_rate - trade.open_rate) * trade.volume
+        pl = round(self.convert_to_account_currency(quote_pl, trade.instrument[1]), 4)
         self.realized_pl += pl
         self.balance += pl
         trade.set_profit(pl)
@@ -106,16 +112,19 @@ class TestBrokerLocal():
         self.stat.add_trade(trade)
         return trade
 
-    def convert_currency(self, instrument, base_volume, rate=None):
-        if rate:
-            return base_volume * rate
+    def convert_from_account_currency(self, volume, target_currency):
+        if target_currency == self.account_currency:
+            return volume
         else:
-            tick = self.get_tick_data(instrument)
+            tick = self.get_tick_data((self.account_currency, target_currency)).__next__()
+            return volume * tick.buy
 
-            if base_volume > 0: # buy
-                return tick.buy * base_volume
-            else: # sell
-                return tick.sell * abs(base_volume)
+    def convert_to_account_currency(self, volume, source_currency):
+        if source_currency == self.account_currency:
+            return volume
+        else:
+            tick = self.get_tick_data((self.account_currency, source_currency)).__next__()
+            return volume * (1.0 /tick.buy)
 
     def close_finished_trades(self, trades):
         """

@@ -1,6 +1,6 @@
 {
     "use" : {
-        "broker" : "test_broker",
+        "broker" : "broker_compare",
         "model" : "mock_model",
         "log_level" : "DEBUG",
         "log_format" : "%(asctime)s %(name)s: %(message)s"
@@ -22,6 +22,18 @@
                 "day" : 1
             },
             "end_date" : ""
+        }
+    },
+    "test_broker_real" : {
+        "class" : "src.brokers.test_broker.TestBrokerLocal",
+        "account_balance" : 1000,
+        "margin_rate" : 0.05,
+        "tick_source": {
+            "class" : "src.brokers.oanda_broker.OandaBroker",
+            "enviroment" : "sandbox",
+            "username" : "CHANGEME",
+            "access_token" : "None",
+            "tick_freq_ms" : 500
         }
     },
     "mock_broker" : {
