@@ -116,15 +116,21 @@ class TestBrokerLocal():
         if target_currency == self.account_currency:
             return volume
         else:
-            tick = self.get_tick_data((self.account_currency, target_currency)).__next__()
-            return volume * tick.buy
+            if self.last_tick[(self.account_currency, target_currency)]:
+                return volume * self.last_tick[(self.account_currency, target_currency)].buy
+            else:
+                tick = self.get_tick_data((self.account_currency, target_currency)).__next__()
+                return volume * tick.buy
 
     def convert_to_account_currency(self, volume, source_currency):
         if source_currency == self.account_currency:
             return volume
         else:
-            tick = self.get_tick_data((self.account_currency, source_currency)).__next__()
-            return volume * (1.0 /tick.buy)
+            if self.last_tick[(self.account_currency, source_currency)]:
+                return volume * (1.0 /self.last_tick[(self.account_currency, source_currency)].buy)
+            else:
+                tick = self.get_tick_data((self.account_currency, source_currency)).__next__()
+                return volume * (1.0 /tick.buy)
 
     def close_finished_trades(self, trades):
         """

@@ -30,7 +30,10 @@ class LocalData():
         Read the TFX
         """
         db = self._scan_tfx_directory()
-        filenames = [db[instrument][k] for k in sorted(db[instrument]) if self.test_data['end_date'] > k >= self.test_data['start_date']]
+
+        start_date = datetime(self.test_data['start_date'].year, self.test_data['start_date'].month, 1)
+        end_date = datetime(self.test_data['end_date'].year, self.test_data['end_date'].month, 1)
+        filenames = [db[instrument][k] for k in sorted(db[instrument]) if end_date >= k >= start_date]
 
         Tick = namedtuple("Tick", "datetime buy sell")
 
@@ -40,9 +43,9 @@ class LocalData():
                 csv_reader = csv.reader(csv_file, delimiter=',')
                 for row in csv_reader:
                     tick_datetime = datetime.strptime(row[1], '%Y%m%d %H:%M:%S.%f')
-                    if self.test_data['start_date'] >= tick_datetime > self.test_data['end_date']:
-                        next
-                    else:
+                    if self.test_data['start_date'] <= tick_datetime < self.test_data['end_date'] :
                         yield Tick(tick_datetime, float(row[3]), float(row[2]))
+                    elif tick_datetime >= self.test_data['end_date']:
+                        break
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
