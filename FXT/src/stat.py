@@ -83,15 +83,18 @@ class Stat():
             for trade in self.trades:
                 if show_trades == 'all':
                     for axe in ax:
-                        axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='y', alpha=0.5, clip_on=False)
+                        if trade.profit > 0:
+                            axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='g', alpha=0.5)
+                        else:
+                            axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='r', alpha=0.5)
                 elif show_trades == '+':
                     if trade.profit > 0:
                         for axe in ax:
-                            axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='y', alpha=0.5, clip_on=False)
+                            axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='g', alpha=0.5)
                 elif show_trades == '-':
                     if trade.profit <= 0:
                         for axe in ax:
-                            axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='y', alpha=0.5, clip_on=False)
+                            axe.axvspan(xmin=trade.open_datetime, xmax=trade.close_datetime, facecolor='r', alpha=0.5)
         plt.show(block=True)
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
