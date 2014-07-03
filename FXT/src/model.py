@@ -6,14 +6,15 @@ from abc import ABCMeta, abstractmethod
 from src.pricebuffer import PriceBuffer
 
 class Model(metaclass=ABCMeta):
-    def __init__(self, instrument, pricebuffer_size=1000):
+    def __init__(self, instrument, mode='all', pricebuffer_size=1000):
         self.buffer = PriceBuffer(size=pricebuffer_size)
 
         self.instrument = tuple(instrument)
+        self.mode = mode
         self.trades = []
 
     @abstractmethod
-    def train(self, train_data):
+    def train(self, tick_source_config, model_name):
         pass
 
     def open_position(self, broker, instrument, volume, order_type='market', expiry=None, **args):
@@ -31,5 +32,15 @@ class Model(metaclass=ABCMeta):
     @abstractmethod
     def trade(self, broker):
         pass
+
+    def start(self, broker):
+        if self.mode == 'trade':
+            self.trade(broker)
+        elif self.mode == 'train':
+            self.train()
+        elif self.mode == 'all':
+            self.train()
+            self.trade(broker)
+
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4

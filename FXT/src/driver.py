@@ -36,6 +36,6 @@ class Driver():
         return getattr(module, class_name)(**params)
 
     def start(self):
-        self.model.trade(self.broker)
+        self.model.start(self.broker)
 
 # vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
