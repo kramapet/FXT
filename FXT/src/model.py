@@ -6,11 +6,12 @@ from abc import ABCMeta, abstractmethod
 from src.pricebuffer import PriceBuffer
 
 class Model(metaclass=ABCMeta):
-    def __init__(self, instrument, mode='all', pricebuffer_size=1000):
+    def __init__(self, instrument, mode='all', pricebuffer_size=1000, **params):
         self.buffer = PriceBuffer(size=pricebuffer_size)
-
         self.instrument = tuple(instrument)
         self.mode = mode
+        self.params = params
+
         self.trades = []
 
     @abstractmethod
