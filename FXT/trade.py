@@ -3,7 +3,7 @@
 
 from datetime import datetime
 
-from src.stat import Stat
+from FXT.stat import Stat
 
 class Trade():
     def __init__(self, instrument, volume, open_price, open_datetime, id=None, **args):

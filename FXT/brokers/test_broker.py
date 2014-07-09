@@ -5,10 +5,10 @@ import logging
 import importlib
 from datetime import datetime
 
-from src.local_data import LocalData
-from src.stat import Stat
-from src.trade import Trade
-from src.driver import Driver
+from FXT.local_data import LocalData
+from FXT.stat import Stat
+from FXT.trade import Trade
+from FXT.driver import Driver
 
 class TestBrokerLocal():
     def __init__(self, account_balance, margin_rate, tick_source, account_currency="EUR"):

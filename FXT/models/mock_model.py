@@ -3,7 +3,7 @@
 
 import pandas as pd
 
-from src.model import Model
+from FXT.model import Model
 
 class MockModel(Model):
     """

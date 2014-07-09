@@ -3,8 +3,8 @@
 
 from datetime import datetime
 
-from src.stat import Stat
-from src.trade import Trade
+from FXT.stat import Stat
+from FXT.trade import Trade
 
 class MockBroker():
     def __init__(self):

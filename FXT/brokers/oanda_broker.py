@@ -6,9 +6,9 @@ from datetime import datetime, timedelta
 from time import sleep
 from collections import namedtuple
 
-from src.thirdparty.oandapy import oandapy
-from src.stat import Stat
-from src.trade import Trade
+from FXT.thirdparty.oandapy import oandapy
+from FXT.stat import Stat
+from FXT.trade import Trade
 
 Tick = namedtuple("Tick", "datetime buy sell")
 

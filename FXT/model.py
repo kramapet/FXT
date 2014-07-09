@@ -3,7 +3,7 @@
 
 from abc import ABCMeta, abstractmethod
 
-from src.pricebuffer import PriceBuffer
+from FXT.pricebuffer import PriceBuffer
 
 class Model(metaclass=ABCMeta):
     def __init__(self, instrument, mode='all', pricebuffer_size=1000, **params):

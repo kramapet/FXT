@@ -3,7 +3,7 @@
 
 import logging
 
-from src.driver import Driver
+from FXT.driver import Driver
 
 FORMAT = '%(asctime)s %(name)s: %(message)s'
 logging.basicConfig(format=FORMAT)
