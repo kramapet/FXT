@@ -4,3 +4,7 @@ http://fxtrade.oanda.com/analysis/profit-calculator/
 TFX data source -
 http://truefx.com/
 
+
++ split direct dependencies
++ write tests
++ support for writing models in R language
