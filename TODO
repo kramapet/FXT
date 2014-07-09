@@ -5,6 +5,7 @@ TFX data source -
 http://truefx.com/
 
 
++ write setup.py
 + split direct dependencies
 + write tests
 + support for writing models in R language
