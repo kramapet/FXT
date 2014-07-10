@@ -9,6 +9,16 @@ class CliRunner(AbstractRunner):
 
 
 def start_cli_runner():
-	"""start CliRunner, used by setuptools. see setup.py"""
-	r = CliRunner()
-	r.run()
+	"""used by setuptools. see setup.py
+	installation make executable command running
+	this function"""
+
+	import logging
+	
+	from FXT.driver import Driver
+	
+	FORMAT = '%(asctime)s %(name)s: %(messages)s'
+	logging.basicConfig(format=FORMAT)
+
+	d = Driver()
+	d.start()
