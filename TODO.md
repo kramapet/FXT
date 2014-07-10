@@ -12,4 +12,3 @@ http://truefx.com/
 - [ ] split direct dependencies
 - [ ] write tests
 - [ ] support for writing models in R language
-
