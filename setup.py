@@ -9,6 +9,7 @@ setup(
 	author='',
 	author_email='',
 	packages=['FXT'],
+	install_requires=['pandas', 'matplotlib'],
 	entry_points={
 		'console_scripts': [
 			'fxt = FXT.runners:start_cli_runner'
