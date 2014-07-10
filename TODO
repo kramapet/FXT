@@ -5,7 +5,8 @@ TFX data source -
 http://truefx.com/
 
 
-+ write setup.py
+- write setup.py
++ use 'oandapy' as dependency via setup.py, not as a git submodule
 + split direct dependencies
 + write tests
 + support for writing models in R language
