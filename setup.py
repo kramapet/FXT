@@ -21,7 +21,13 @@ setup(
 	license='GPL',
 	author='',
 	author_email='',
-	packages=['FXT', 'FXT.brokers', 'FXT.models', 'FXT.thirdparty.oandapy'],
+	packages=[
+		'FXT', 
+		'FXT.brokers', 
+		'FXT.models', 
+		'FXT.thirdparty',
+		'FXT.thirdparty.oandapy'
+	],
 	install_requires=['pandas', 'matplotlib'],
 	cmdclass={
 		'install': UpdateSubmodules
