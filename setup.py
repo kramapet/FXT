@@ -17,7 +17,7 @@ setup(
 	name='FXT',
 	version='0.2.dev',
 	description='ForeX Trading platform',
-	url='https://github.com/kramapet/FXT',
+	url='https://github.com/kramapet/FXT@0.2.dev',
 	license='GPL',
 	author='',
 	author_email='',
