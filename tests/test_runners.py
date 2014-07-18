@@ -11,6 +11,10 @@ class MockBrokerWithoutAnnotation:
 	def __init__(self, account_balance, margin, start_date):
 		pass
 
+class MockRenderer:
+	def __init__(self):
+		pass
+
 class MockModel:
 	def __init__(self, instrument: list):
 		pass
@@ -20,7 +24,8 @@ class MockLoader:
 		classes = {
 			'FXT.brokers.BaseBrokerWithout' : MockBrokerWithoutAnnotation,
 			'FXT.brokers.BaseBroker': MockBrokerWithAnnotation,
-			'FXT.models.BaseModel': MockModel
+			'FXT.models.BaseModel': MockModel,
+			'FXT.renderers.BaseRenderer': MockRenderer
 		}
 
 		return classes[classname]
@@ -29,8 +34,9 @@ class TestCliRunner(unittest.TestCase):
 
 	def test_parse_arguments(self):
 		options = [
-			'FXT.brokers.BaseBroker',
-			'FXT.models.BaseModel',
+			'--broker', 'FXT.brokers.BaseBroker',
+			'--model', 'FXT.models.BaseModel',
+			'--renderer', 'FXT.renderers.BaseRenderer',
 			'--broker-account-balance', '2500',
 			'--broker-margin', '0.321',
 			'--broker-start-date', '1989-07-20 23:00:12',
@@ -46,7 +52,7 @@ class TestCliRunner(unittest.TestCase):
 		self.assertEqual(parsed.broker_start_date, datetime(1989, 7, 20, 23, 0, 12))
 		self.assertEqual(parsed.model_instrument, ['USD','EUR'])
 
-		options[0] = 'FXT.brokers.BaseBrokerWithout'
+		options[1] = 'FXT.brokers.BaseBrokerWithout'
 		parsed = r.parse_arguments(options)
 		self.assertEqual(parsed.broker_account_balance, '2500')
 		self.assertEqual(parsed.broker_margin, '0.321')

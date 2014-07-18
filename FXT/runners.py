@@ -24,6 +24,11 @@ class BaseRunner:
 
 		renderer.process(transactions, broker_info, model_info)
 
+"""CliRunner - class for running app from cli
+
+TODO:
+	Add support for entity as another dependency
+"""
 class CliRunner(BaseRunner):
 	
 	def __init__(self):
@@ -39,21 +44,24 @@ class CliRunner(BaseRunner):
 		Keyword arguments:
 		args -- <list> arguments
 		"""
-		entities = ('broker', 'model')
+		entities = ('broker', 'model', 'renderer')
 		parser = ArgumentParser()
 
 		# add entities as required arguments
 		for ent in entities:
-			parser.add_argument(ent, help=ent + ' class')
+			parser.add_argument('--' + ent, '-' + ent[0], help=ent + ' class', required=True)
 
 		parsed = parser.parse_known_args(args)[0]
 
+		# TODO: sort entities if they've been 
+		# passed in wrong order
 
 		entities_class = dict() # entity: class
 		for ent in entities:
 			entities_class[ent] = self.load_class(getattr(parsed, ent))
 			self.add_entity_arguments(parser, ent, entities_class[ent])
 
+	
 		parsed = parser.parse_args(args)
 		
 		for ent in entities:
@@ -94,7 +102,7 @@ class CliRunner(BaseRunner):
 
 		Keyword arguments:
 		parser -- <ArgumentParser>
-		entity -- <string> {model,broker,renderer}
+		entity -- <string> {model,broker,renderer,...}
 		entity_class -- <class>
 		"""
 		
