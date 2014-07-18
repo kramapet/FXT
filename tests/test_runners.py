@@ -7,6 +7,10 @@ class MockBrokerWithAnnotation:
 	def __init__(self, account_balance: int, margin: float, start_date: datetime):
 		pass
 
+class MockBrokerWithDefaults:
+	def __init__(self, account_balance: int, margin: float, start_date: datetime = '1989-07-20 12:00:00'):
+		pass
+
 class MockBrokerWithoutAnnotation:
 	def __init__(self, account_balance, margin, start_date):
 		pass
@@ -24,6 +28,7 @@ class MockLoader:
 		classes = {
 			'FXT.brokers.BaseBrokerWithout' : MockBrokerWithoutAnnotation,
 			'FXT.brokers.BaseBroker': MockBrokerWithAnnotation,
+			'FXT.brokers.BaseBrokerDefault': MockBrokerWithDefaults,
 			'FXT.models.BaseModel': MockModel,
 			'FXT.renderers.BaseRenderer': MockRenderer
 		}
@@ -56,3 +61,11 @@ class TestCliRunner(unittest.TestCase):
 		parsed = r.parse_arguments(options)
 		self.assertEqual(parsed.broker_account_balance, '2500')
 		self.assertEqual(parsed.broker_margin, '0.321')
+
+		options[1] = 'FXT.brokers.BaseBrokerDefault'		
+		options.remove('--broker-start-date')
+		options.remove('1989-07-20 23:00:12')
+		parsed = r.parse_arguments(options)
+		self.assertEqual(parsed.broker_account_balance, 2500)
+		self.assertEqual(parsed.broker_margin, 0.321)
+		self.assertEqual(parsed.broker_start_date, datetime(1989, 7, 20, 12, 0, 0))

@@ -63,7 +63,7 @@ class CliRunner(BaseRunner):
 
 	
 		parsed = parser.parse_args(args)
-		
+
 		for ent in entities:
 			# replace classnames by class in parsed arguments
 			setattr(parsed, ent, entities_class[ent])
@@ -120,7 +120,11 @@ class CliRunner(BaseRunner):
 		# return argument names without 'self'
 		init_args = code.co_varnames[1:]
 		init_annot = entity_class.__init__.__annotations__
+		init_defaults = dict()
+		if entity_class.__init__.__defaults__ is not None:
+			init_defaults = dict(zip(reversed(init_args), reversed(entity_class.__init__.__defaults__)))
 		for arg in init_args:
+			kwargs = dict(required=True,default=None)
 			# build long posix argument name
 			arg_name = '--' + entity + '-' + arg.replace('_','-')
 			# set default type to string
@@ -129,7 +133,12 @@ class CliRunner(BaseRunner):
 			if arg in init_annot:
 				arg_type = self.get_type_callback(init_annot[arg])
 
-			parser.add_argument(arg_name, type=arg_type)
+			if arg in init_defaults:
+				kwargs['required'] = False
+				kwargs['default'] = init_defaults[arg]
+
+
+			parser.add_argument(arg_name, type=arg_type, **kwargs)
 
 	def get_type_callback(self, arg_type):
 		"""Get function responsible for converting argument
