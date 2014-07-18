@@ -41,3 +41,9 @@ class TestCliRunner(unittest.TestCase):
 		self.assertEqual(parsed.broker_account_balance, 2500)
 		self.assertEqual(parsed.broker_margin, 0.321)
 		self.assertEqual(parsed.model_instrument, ['USD','EUR'])
+
+		options[0] = 'FXT.brokers.BaseBrokerWithout'
+		parsed = r.parse_arguments(options)
+		self.assertEqual(parsed.broker_account_balance, '2500')
+		self.assertEqual(parsed.broker_margin, '0.321')
+
