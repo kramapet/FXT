@@ -53,9 +53,6 @@ class CliRunner(BaseRunner):
 
 		parsed = parser.parse_known_args(args)[0]
 
-		# TODO: sort entities if they've been 
-		# passed in wrong order
-
 		entities_class = dict() # entity: class
 		for ent in entities:
 			entities_class[ent] = self.load_class(getattr(parsed, ent))
@@ -121,7 +118,9 @@ class CliRunner(BaseRunner):
 		init_args = code.co_varnames[1:]
 		init_annot = entity_class.__init__.__annotations__
 		init_defaults = dict()
+
 		if entity_class.__init__.__defaults__ is not None:
+			# get dict with default values - varname: default_value
 			init_defaults = dict(zip(reversed(init_args), reversed(entity_class.__init__.__defaults__)))
 		for arg in init_args:
 			kwargs = dict(required=True,default=None)
@@ -141,8 +140,7 @@ class CliRunner(BaseRunner):
 			parser.add_argument(arg_name, type=arg_type, **kwargs)
 
 	def get_type_callback(self, arg_type):
-		"""Get function responsible for converting argument
-		to annotated argument
+		"""Get callback to convert argument
 
 		Keyword arguments:
 		arg_type -- argument type
