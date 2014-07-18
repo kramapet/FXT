@@ -26,7 +26,7 @@ class MockLoader:
 
 class TestCliRunner(unittest.TestCase):
 
-	def test_cli(self):
+	def test_parse_arguments(self):
 		options = [
 			'FXT.brokers.BaseBroker',
 			'FXT.models.BaseModel',
@@ -35,7 +35,8 @@ class TestCliRunner(unittest.TestCase):
 			'--model-instrument', 'USD,EUR'
 		]
 
-		r = CliRunner(MockLoader())
+		r = CliRunner()
+		r.loaders.append(MockLoader())
 		parsed = r.parse_arguments(options)
 
 		self.assertEqual(parsed.broker_account_balance, 2500)
@@ -46,4 +47,3 @@ class TestCliRunner(unittest.TestCase):
 		parsed = r.parse_arguments(options)
 		self.assertEqual(parsed.broker_account_balance, '2500')
 		self.assertEqual(parsed.broker_margin, '0.321')
-

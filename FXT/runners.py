@@ -2,23 +2,33 @@ from argparse import ArgumentParser
 
 class BaseRunner:
 
-	def run(self):
-		while self.broker.has_tick():
-			self.model.beforeTick()
-			self.model.processTick(self.broker.get_tick())
-			self.model.afterTick()
-			self.broker.afterTick()
+	def run(self, broker, model, renderer):
+		"""Run app life cycle
 
-		self.renderer.process(self.broker.get_transactions(), self.broker.get_info(), self.model.get_info())
+		Keyword arguments:
+		broker -- FXT.brokers.BaseBroker
+		model  -- FXT.models.BaseModel
+		renderer -- FXT.renderers.BaseRenderer
+		"""
+		while broker.has_tick():
+			broker.before_tick()
+			model.before_tick()
+			model.process_tick(broker.get_tick())
+			model.after_tick()
+			broker.after_tick()
 
+		transaction = broker.get_transactions()
+		broker_info = broker.get_info()
+		model_info = model.get_info()
 
+		renderer.process(transactions, broker_info, model_info)
 
 class CliRunner(BaseRunner):
 	
-	def __init__(self, loader):
-		self.loader = loader
+	def __init__(self):
+		self.loaders = list()
 		self.type_callbacks = {
-			list: self.__parse_type_list
+			list: lambda arg: arg.split(',')
 		}	
 
 	def parse_arguments(self, args):
@@ -28,21 +38,52 @@ class CliRunner(BaseRunner):
 		args -- <list> arguments
 		"""
 		entities = ('broker', 'model')
-
-		broker_class = self.loader.load(args[0])
-		model_class = self.loader.load(args[1])
 		parser = ArgumentParser()
-		parser.add_argument('broker', help='Broker class')
-		parser.add_argument('model', help='Model class')
 
-		for entity in entities:
-			self.__add_entity_arguments(parser, entity, broker_class)
-			self.__add_entity_arguments(parser, entity, model_class)
+		# add entities as required arguments
+		for ent in entities:
+			parser.add_argument(ent, help=ent + ' class')
+
+		parsed = parser.parse_known_args(args)[0]
 
 
-		return parser.parse_args(args)
+		entities_class = dict() # entity: class
+		for ent in entities:
+			entities_class[ent] = self.load_class(getattr(parsed, ent))
+			self.add_entity_arguments(parser, ent, entities_class[ent])
 
-	def __add_entity_arguments(self, parser, entity, entity_class):
+		parsed = parser.parse_args(args)
+		
+		for ent in entities:
+			# replace classnames by class in parsed arguments
+			setattr(parsed, ent, entities_class[ent])
+
+		return parsed
+
+	def load_class(self, cls):
+		"""Try to load class from registered loaders
+
+		Keyword arguments:
+		classname -- classname
+		"""
+		
+		"""Loader tries to load a class 
+		if package is successfully loaded and class returned
+		end of loop and class is returned from function
+		if loader cannot load/find particular classname
+		then loader raises ImportError, that exception
+		is caught and next loader give a try"""
+		for loader in self.loaders:
+			try:
+				return loader.load(cls)
+			except ImportError: 
+				pass 
+			
+
+		raise ImportError('Class {} not found'.format(cls))
+	
+
+	def add_entity_arguments(self, parser, entity, entity_class):
 		"""Add entity arguments
 
 		Check if constructor of entity class has annotated
@@ -77,18 +118,11 @@ class CliRunner(BaseRunner):
 			arg_type = str
 			
 			if arg in init_annot:
-				arg_type = self.__get_type_callback(init_annot[arg])
+				arg_type = self.get_type_callback(init_annot[arg])
 
 			parser.add_argument(arg_name, type=arg_type)
 
-	def __instantiate_entity(self, entity, entity_class, args):
-		pass
-
-	def __parse_type_list(self, arg):
-		"""Parse argument type of list"""
-		return arg.split(',')
-
-	def __get_type_callback(self, arg_type):
+	def get_type_callback(self, arg_type):
 		"""Get function responsible for converting argument
 		to annotated argument
 
