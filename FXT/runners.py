@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from datetime import datetime
 
 class BaseRunner:
 
@@ -28,7 +29,8 @@ class CliRunner(BaseRunner):
 	def __init__(self):
 		self.loaders = list()
 		self.type_callbacks = {
-			list: lambda arg: arg.split(',')
+			list: lambda arg: arg.split(','),
+			datetime: lambda arg: datetime.strptime(arg, '%Y-%m-%d %H:%M:%S')
 		}	
 
 	def parse_arguments(self, args):
@@ -110,7 +112,6 @@ class CliRunner(BaseRunner):
 		# return argument names without 'self'
 		init_args = code.co_varnames[1:]
 		init_annot = entity_class.__init__.__annotations__
-
 		for arg in init_args:
 			# build long posix argument name
 			arg_name = '--' + entity + '-' + arg.replace('_','-')
