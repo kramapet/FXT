@@ -103,10 +103,6 @@ class CliRunner(BaseRunner):
 		entity_class -- <class>
 		"""
 		
-		# constructor is not defined
-		if not hasattr(entity_class, '__init__'):
-			return
-
 		code = entity_class.__init__.__code__
 
 		# entity constructor has not any argument to pass
@@ -128,9 +124,11 @@ class CliRunner(BaseRunner):
 			arg_name = '--' + entity + '-' + arg.replace('_','-')
 			# set default type to string
 			arg_type = str
+
 			
 			if arg in init_annot:
 				arg_type = self.get_type_callback(init_annot[arg])
+
 
 			if arg in init_defaults:
 				kwargs['required'] = False
