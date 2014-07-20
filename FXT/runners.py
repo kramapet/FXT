@@ -26,8 +26,6 @@ class BaseRunner:
 
 """CliRunner - class for running app from cli
 
-TODO:
-	Add support for entity as another dependency
 """
 class CliRunner(BaseRunner):
 	
@@ -37,6 +35,8 @@ class CliRunner(BaseRunner):
 			list: lambda arg: arg.split(','),
 			datetime: lambda arg: datetime.strptime(arg, '%Y-%m-%d %H:%M:%S')
 		}	
+		self.entities_class = dict()
+		self.entities_args = dict()
 
 	def parse_arguments(self, args):
 		"""Parse arguments
@@ -44,7 +44,7 @@ class CliRunner(BaseRunner):
 		Keyword arguments:
 		args -- <list> arguments
 		"""
-		entities = ('broker', 'model', 'renderer')
+		entities = [ 'broker', 'model', 'renderer' ]
 		parser = ArgumentParser()
 
 		# add entities as required arguments
@@ -53,19 +53,36 @@ class CliRunner(BaseRunner):
 
 		parsed = parser.parse_known_args(args)[0]
 
-		entities_class = dict() # entity: class
 		for ent in entities:
-			entities_class[ent] = self.load_class(getattr(parsed, ent))
-			self.add_entity_arguments(parser, ent, entities_class[ent])
-
+			self.entities_class[ent] = self.load_class(getattr(parsed, ent))
+			self.add_entity_arguments(parser, ent, self.entities_class[ent])
 	
 		parsed = parser.parse_args(args)
 
 		for ent in entities:
-			# replace classnames by class in parsed arguments
-			setattr(parsed, ent, entities_class[ent])
+			setattr(self, ent, self.instantiate_entity(ent, self.entities_class[ent], parsed))
 
-		return parsed
+	def instantiate_entity(self, entity, cls, namespace):
+		"""Instantiate entity from parsed arguments
+
+		Keyword arguments:
+		entity -- <str> entity name
+		cls -- <class> entity class
+		namespace -- parsed arguments
+		"""
+		entity_args = dict()
+
+		if entity in self.entities_args:
+			entity_args = self.entities_args[entity]
+			for k in entity_args:
+				if entity_args[k].startswith(':'): # it is entity
+					entity_args[k] = self.instantiate_entity(k, self.entities_class[k], namespace)
+				else: # regular argument
+					entity_args[k] = getattr(namespace, entity_args[k])
+
+		return cls(**entity_args)
+
+
 
 	def load_class(self, cls):
 		"""Try to load class from registered loaders
@@ -102,7 +119,7 @@ class CliRunner(BaseRunner):
 		entity -- <string> {model,broker,renderer,...}
 		entity_class -- <class>
 		"""
-		
+
 		code = entity_class.__init__.__code__
 
 		# entity constructor has not any argument to pass
@@ -114,21 +131,30 @@ class CliRunner(BaseRunner):
 		init_args = code.co_varnames[1:]
 		init_annot = entity_class.__init__.__annotations__
 		init_defaults = dict()
+		self.entities_args[entity] = dict()
 
 		if entity_class.__init__.__defaults__ is not None:
 			# get dict with default values - varname: default_value
 			init_defaults = dict(zip(reversed(init_args), reversed(entity_class.__init__.__defaults__)))
+
 		for arg in init_args:
+			if arg in init_annot and self.is_entity(init_annot[arg]):
+				self.entities_class[arg] = init_annot[arg]
+				# new entity is marked by :, see instantiate_entity
+				self.entities_args[entity][arg] = ':' + arg
+				self.add_entity_arguments(parser, arg, init_annot[arg])
+				continue
+
 			kwargs = dict(required=True,default=None)
 			# build long posix argument name
 			arg_name = '--' + entity + '-' + arg.replace('_','-')
 			# set default type to string
 			arg_type = str
-
 			
 			if arg in init_annot:
 				arg_type = self.get_type_callback(init_annot[arg])
 
+			self.entities_args[entity][arg] = entity + '_' + arg
 
 			if arg in init_defaults:
 				kwargs['required'] = False
@@ -147,6 +173,18 @@ class CliRunner(BaseRunner):
 			return self.type_callbacks[arg_type]
 
 		return arg_type
+
+	def is_entity(self, ent):
+		"""Return True if entity has been passed
+
+		entity have not registered type callback
+		entity is not str, int, float 
+
+		Keyword arguments:
+		ent -- entity type
+		"""
+		return self.get_type_callback(ent) is ent and \
+				not ent in [str, int, float]
 
 def start_cli_runner():
 	"""used by setuptools. see setup.py
