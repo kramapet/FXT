@@ -12,5 +12,4 @@ http://truefx.com/
 - [x] Implement CliRunner 
 - [ ] Implement adapter to run original brokers
 - [ ] support for writing models in R language
-- [ ] write tests
 - [ ] implemenent renderers
